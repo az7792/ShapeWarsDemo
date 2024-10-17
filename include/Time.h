@@ -2,19 +2,24 @@
 #include <string>
 #include <ctime>
 #include <sstream>
+#include <iomanip>
 class Time
 {
-     std::time_t second_;
+     std::time_t timestamp_;
+     int year_, month_, day_, hour_, minute_, second_;
 
 public:
      Time();
-     explicit Time(std::time_t second);
+     explicit Time(std::time_t timestamp);
      static Time now();
      std::string toString() const;
 
      // 获取时间戳
-     std::time_t getTime_t() const;
-     
+     std::time_t getTimestamp() const;
+
+     // 设置时间戳
+     void setTimestamp(std::time_t timestamp);
+
      //  获取年
      int getYear() const;
 
