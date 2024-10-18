@@ -2,7 +2,7 @@
 
 CXX = g++
 CXXFLAGS = -Iinclude -std=c++17 -Wall
-SRC = main.cpp src/Time.cpp
+SRC = main.cpp $(wildcard src/*.cpp)
 
 OBJ = $(SRC:.cpp=.o)
 TARGET = main
