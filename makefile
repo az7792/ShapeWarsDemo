@@ -2,18 +2,27 @@
 
 CXX = g++
 CXXFLAGS = -Iinclude -std=c++17 -Wall
-SRC = main.cpp $(wildcard src/*.cpp)
+SRC = $(wildcard src/*.cpp)
 
 OBJ = $(SRC:.cpp=.o)
-TARGET = main
+
+ALL_SRC = main.cpp client.cpp $(SRC)
+
+TARGET = main client
 
 all: $(TARGET)
 
-$(TARGET): $(OBJ)
+# $(TARGET): $(OBJ)
+# 	$(CXX) -o $@ $^
+
+main: main.o $(OBJ)
+	$(CXX) -o $@ $^
+
+client: client.o $(OBJ)
 	$(CXX) -o $@ $^
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -f $(OBJ) $(TARGET) main.o client.o
