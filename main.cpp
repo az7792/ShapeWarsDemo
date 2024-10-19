@@ -1,15 +1,14 @@
 #include <iostream>
-#include "include/Time.h"
 #include <unistd.h>
+#include "include/Time.h"
 #include "include/Logger.h"
+#include "include/InetAddress.h"
+using namespace std;
 int main()
 {
-     Time tm = Time::now();
-     std::cout << tm.toString() << " " << tm.getSecond();
-     sleep(1);
-     tm.setTimestamp(Time::now().getTimestamp());
-     std::cout << tm.toString() << " " << tm.getSecond();
-     Logger::instance().setLevel(LogLevel::FATAL);
-     Logger::instance().fatal("fa");
+     Logger::instance().setLevel(LogLevel::DEBUG);
+     InetAddress addr("123.56.155.4", 7792);
+     cout << addr.getIpPort();
+     cout << endl;
      return 0;
 }
