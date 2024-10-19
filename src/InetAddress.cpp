@@ -21,6 +21,6 @@ uint16_t InetAddress::getPort() const { return ntohs(addr_.sin_port); }
 
 std::string InetAddress::getIpPort() const { return getIp() + ":" + std::to_string(getPort()); }
 
-sockaddr_in *InetAddress::getSockaddr() { return &addr_; }
+const sockaddr_in *InetAddress::getSockaddr() const { return &addr_; }
 
 void InetAddress::setSockaddr(const sockaddr_in &addr) { addr_ = addr; }

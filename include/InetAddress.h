@@ -16,6 +16,6 @@ public:
      uint16_t getPort() const;
      std::string getIpPort() const;
 
-     sockaddr_in *getSockaddr();
+     const sockaddr_in *getSockaddr() const;
      void setSockaddr(const sockaddr_in &addr);
 };
