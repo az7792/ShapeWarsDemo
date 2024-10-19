@@ -98,4 +98,5 @@ void Logger::fatal(const std::string &message)
 {
      std::lock_guard<std::mutex> lock(mutex_);
      log(Time::now(), LogLevel::FATAL, message);
+     exit(-1);
 }
