@@ -12,7 +12,7 @@ class Socket
      int fd_ = -1;
 
 public:
-     Socket(int fd) : fd_(fd) {}
+     Socket(int fd = -1) : fd_(fd) {}
      ~Socket();
 
      int getFd() const { return fd_; };
