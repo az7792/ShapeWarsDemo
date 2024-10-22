@@ -4,7 +4,9 @@ CXX = g++
 CXXFLAGS = -Iinclude -std=c++17 -Wall
 SRC = $(wildcard src/*.cpp)
 
-OBJ = $(SRC:.cpp=.o)
+OBJ = $(patsubst src/%.cpp, build/%.o, $(SRC))
+MAIN_OBJ = build/main.o
+CLIENT_OBJ = build/client.o
 
 ALL_SRC = main.cpp client.cpp $(SRC)
 
@@ -15,14 +17,21 @@ all: $(TARGET)
 # $(TARGET): $(OBJ)
 # 	$(CXX) -o $@ $^
 
-main: main.o $(OBJ)
+main: build/main.o $(OBJ)
 	$(CXX) -o $@ $^
 
-client: client.o $(OBJ)
+client: build/client.o $(OBJ)
 	$(CXX) -o $@ $^
 
-%.o: %.cpp
+
+build/%.o: src/%.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+build/main.o: main.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+build/client.o: client.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(TARGET) main.o client.o
+	rm -f $(TARGET) build/*
