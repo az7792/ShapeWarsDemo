@@ -5,55 +5,42 @@
 #include "include/InetAddress.h"
 #include "include/Socket.h"
 #include "include/EventLoop.h"
+#include "include/Acceptor.h"
 using namespace std;
-Socket *sfd;
 EventLoop loop;
 vector<Channel *> chs;
-vector<Socket *> socks;
-void readCb(Socket *sc, Channel *ch)
+void readCb(int fd, Channel *ch)
 {
-     string sss = sc->recv();
-     if (sss == "")
+     char buf[1024];
+     recv(fd, buf, 1024, 0);
+     if (strcmp(buf, "") == 0)
      {
-          loop.removeChannel(ch);
-          Logger::instance().info("exit");
+          cout << "exit\n";
+          ch->remove();
           return;
      }
-     cout << "客户端:" << sss << endl;
-     sc->send("echo" + sss);
+     cout << buf << endl;
+     send(fd, buf, strlen(buf), 0);
+     bzero(buf, 1024);
 }
-void accept_(InetAddress *addr)
+void connection(int cfd, const InetAddress &addr)
 {
-     int fd = sfd->accept(addr);
-     Logger::instance().info(addr->getIpPort() + "已连接");
-     Socket *sc = new Socket(fd);
-     sc->setBlocking(true);
-     Channel *ch = new Channel(&loop, fd);
+     Logger::instance().info(addr.getIpPort() + "已连接");
+     Channel *ch = new Channel(&loop, cfd);
      chs.push_back(ch);
-     socks.push_back(sc);
      (*ch).enableReading();
-     (*ch).setReadCallback(std::bind(readCb, sc, ch));
-     loop.updateChannel(ch);
+     (*ch).setReadCallback(std::bind(readCb, cfd, ch));
 }
 int main()
 {
      Logger::instance().setLevel(LogLevel::DEBUG);
-     int tmpSfd = socket(AF_INET, SOCK_STREAM, 0);
-     sfd = new Socket(tmpSfd);
-     sfd->bind(InetAddress("127.0.0.1", 7792));
-     sfd->listen();
-     sfd->setBlocking(true);
-     Channel ch(&loop, tmpSfd);
-     ch.enableReading();
-     InetAddress addr;
-     ch.setReadCallback(std::bind(accept_, &addr));
-     loop.updateChannel(&ch);
+     InetAddress addr("127.0.0.1", 7792);
+     Acceptor ac(&loop, addr);
+     ac.setNewConnectionCallback(std::function<void(int fd, const InetAddress &addr)>(connection));
 
      loop.loop();
 
      for (auto v : chs)
-          delete v;
-     for (auto v : socks)
           delete v;
      return 0;
 }
