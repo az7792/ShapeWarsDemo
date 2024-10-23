@@ -10,12 +10,14 @@ CLIENT_OBJ = build/client.o
 
 ALL_SRC = main.cpp client.cpp $(SRC)
 
-TARGET = main client
+TARGET = build main client 
 
 all: $(TARGET)
 
 # $(TARGET): $(OBJ)
 # 	$(CXX) -o $@ $^
+build:
+	mkdir build
 
 main: build/main.o $(OBJ)
 	$(CXX) -o $@ $^
