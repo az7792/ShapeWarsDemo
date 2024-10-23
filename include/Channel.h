@@ -17,7 +17,7 @@ class Channel
 
 public:
      Channel(EventLoop *loop, int fd);
-     ~Channel() {}
+     ~Channel() { this->remove(); }
 
      void setReadCallback(const std::function<void()> &cb) { readCallback_ = cb; }
      void setWriteCallback(const std::function<void()> &cb) { writeCallback_ = cb; }

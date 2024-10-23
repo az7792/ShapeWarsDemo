@@ -6,41 +6,40 @@
 #include "include/Socket.h"
 #include "include/EventLoop.h"
 #include "include/Acceptor.h"
+#include "include/TcpConnection.h"
 using namespace std;
+InetAddress localAddr("127.0.0.1", 7792);
 EventLoop loop;
-vector<Channel *> chs;
-void readCb(int fd, Channel *ch)
+void readCb(TcpConnection *tc)
 {
-     char buf[1024];
-     recv(fd, buf, 1024, 0);
-     if (strcmp(buf, "") == 0)
+     Socket *sc = tc->getSocket();
+     string str = sc->recv();
+     if (str == "")
      {
-          cout << "exit\n";
-          ch->remove();
+          Logger::instance().info(tc->getPeerAddr().getIpPort() + "断开连接");
+          tc->close();
           return;
      }
-     cout << buf << endl;
-     send(fd, buf, strlen(buf), 0);
-     bzero(buf, 1024);
+     cout << str << endl;
+     tc->send("~" + str + "~");
 }
+vector<TcpConnection *> tcps;
 void connection(int cfd, const InetAddress &addr)
 {
      Logger::instance().info(addr.getIpPort() + "已连接");
-     Channel *ch = new Channel(&loop, cfd);
-     chs.push_back(ch);
-     (*ch).enableReading();
-     (*ch).setReadCallback(std::bind(readCb, cfd, ch));
+     TcpConnection *tc = new TcpConnection(&loop, localAddr, addr, cfd);
+     tcps.push_back(tc);
+     (*tc).setReadCallback(std::bind(readCb, tc));
 }
 int main()
 {
      Logger::instance().setLevel(LogLevel::DEBUG);
-     InetAddress addr("127.0.0.1", 7792);
-     Acceptor ac(&loop, addr);
+     Acceptor ac(&loop, localAddr);
      ac.setNewConnectionCallback(std::function<void(int fd, const InetAddress &addr)>(connection));
 
      loop.loop();
 
-     for (auto v : chs)
+     for (auto v : tcps)
           delete v;
      return 0;
 }

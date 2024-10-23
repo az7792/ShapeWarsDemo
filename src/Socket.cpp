@@ -43,7 +43,7 @@ void Socket::connect(const InetAddress &addr)
      }
 }
 
-ssize_t Socket::send(const std::string mes)
+ssize_t Socket::send(const std::string &mes)
 {
      ssize_t sentBytes = ::send(fd_, mes.c_str(), mes.size(), 0);
      if (sentBytes < 0)

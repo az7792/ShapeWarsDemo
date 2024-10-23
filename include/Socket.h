@@ -22,7 +22,7 @@ public:
      int accept(InetAddress *addr);         // 默认返回非阻塞IO
      void connect(const InetAddress &addr); // 连接到指定服务器
 
-     ssize_t send(const std::string mes);
+     ssize_t send(const std::string &mes);
      std::string recv();
 
      void shutdownWrite();
