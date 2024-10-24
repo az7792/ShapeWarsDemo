@@ -16,7 +16,10 @@ int main()
           cfd.send(str);
           string recvStr = cfd.recv();
           if (recvStr.empty())
+          {
+               cout << "服务器断开\n";
                break;
+          }
           cout << "server:" << recvStr << endl;
      }
      return 0;

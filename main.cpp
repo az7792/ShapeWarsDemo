@@ -7,9 +7,10 @@
 #include "include/EventLoop.h"
 #include "include/Acceptor.h"
 #include "include/TcpConnection.h"
+#include "include/ThreadPool.h"
+#include "include/TcpServer.h"
 using namespace std;
-InetAddress localAddr("127.0.0.1", 7792);
-EventLoop loop;
+
 void readCb(TcpConnection *tc)
 {
      Socket *sc = tc->getSocket();
@@ -17,29 +18,28 @@ void readCb(TcpConnection *tc)
      if (str == "")
      {
           Logger::instance().info(tc->getPeerAddr().getIpPort() + "断开连接");
-          tc->close();
+          delete tc; // 连接断开后直接delete就行
           return;
+     }
+     if (str == "sleep")
+     {
+          std::this_thread::sleep_for(std::chrono::seconds(10));
      }
      cout << str << endl;
      tc->send("~" + str + "~");
 }
-vector<TcpConnection *> tcps;
-void connection(int cfd, const InetAddress &addr)
+
+void connection(TcpConnection *tc) // tc是已经连接的链接
 {
-     Logger::instance().info(addr.getIpPort() + "已连接");
-     TcpConnection *tc = new TcpConnection(&loop, localAddr, addr, cfd);
-     tcps.push_back(tc);
-     (*tc).setReadCallback(std::bind(readCb, tc));
+     Logger::instance().info(tc->getPeerAddr().getIpPort() + "已连接");
 }
 int main()
 {
      Logger::instance().setLevel(LogLevel::DEBUG);
-     Acceptor ac(&loop, localAddr);
-     ac.setNewConnectionCallback(std::function<void(int fd, const InetAddress &addr)>(connection));
-
-     loop.loop();
-
-     for (auto v : tcps)
-          delete v;
+     TcpServer server(InetAddress("127.0.0.1", 7792), 2);
+     server.setNewConnectionCallback(connection);
+     server.setOnMessageCallback(readCb);
+//   std::this_thread::sleep_for(std::chrono::seconds(1));
+     server.run();
      return 0;
 }

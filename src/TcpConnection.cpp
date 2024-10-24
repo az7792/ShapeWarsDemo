@@ -27,6 +27,11 @@ int TcpConnection::send(const std::string &buf)
      return sock_->send(buf);
 }
 
+std::string TcpConnection::recv()
+{
+     return std::move(sock_->recv());
+}
+
 void TcpConnection::close()
 {
      delete channel_;

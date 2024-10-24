@@ -19,9 +19,10 @@ class TcpConnection
 
      TcpConnectionStatus status_;
 
-     std::function<void()> readCallback_, writeCallback_, errorCallback_; // 回调函数
+     std::function<void(TcpConnection *)> readCallback_;
+     std::function<void()> writeCallback_, errorCallback_; // 回调函数
 
-     void handleRead() { readCallback_(); }
+     void handleRead() { readCallback_(this); }
      void handleWrite() { writeCallback_(); }
      void handleError() { errorCallback_(); }
      void setStatus(TcpConnectionStatus status) { status_ = status; }
@@ -31,8 +32,9 @@ public:
      ~TcpConnection();
 
      int send(const std::string &buf);
+     std::string recv();
      TcpConnectionStatus getStatus() { return status_; }
-     void setReadCallback(const std::function<void()> &cb) { readCallback_ = cb; }
+     void setReadCallback(const std::function<void(TcpConnection *)> &cb) { readCallback_ = cb; }
      void setWriteCallback(const std::function<void()> &cb) { writeCallback_ = cb; }
      void setErrorCallback(const std::function<void()> &cb) { errorCallback_ = cb; }
      Socket *getSocket() { return sock_; }

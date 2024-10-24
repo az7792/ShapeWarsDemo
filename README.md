@@ -1,4 +1,4 @@
-这是一个基于C++的简单Linux TCP网络库，使用了事件驱动的单Reactor模型，并在此基础上实现了一个echo服务器
+这是一个基于C++的简单Linux TCP网络库，使用了事件驱动的多Reactor模型，并在此基础上实现了一个echo服务器
 
 ## 项目结构
 ```
@@ -48,6 +48,15 @@
 8. `Logger`
 
 `Logger` 类用于记录日志信息，支持不同的日志级别（ DEBUG、INFO 等）。
+
+9. `ThreadPool`
+
+`ThreadPool`类为居于C++17实现的异步多队列线程池,访问[ThreadPool](https://github.com/az7792/ThreadPool)查看
+
+10. `TcpServer`
+
+`TcpServer`类实现了一个多线程的 TCP 服务器，负责接收新连接、管理连接和处理消息，并支持设置处理新链接建立与新消息到达的回调，可在此基础上实现其他协议
+
 
 ## Echo服务器
 
