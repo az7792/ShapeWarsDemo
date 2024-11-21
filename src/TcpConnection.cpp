@@ -29,7 +29,7 @@ int TcpConnection::send(const std::string &buf)
 
 std::string TcpConnection::recv()
 {
-     return std::move(sock_->recv());
+     return sock_->recv();
 }
 
 void TcpConnection::close()

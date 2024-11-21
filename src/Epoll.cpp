@@ -37,7 +37,12 @@ std::vector<Channel *> Epoll::wait(int timeout)
      }
      else
      {
-          Logger::instance().error("Epoll wait失败" + std::string(strerror(errno)));
+          if (errno == EINTR)
+          {
+               return chs;
+          }
+          else
+               Logger::instance().error("Epoll wait失败" + std::string(strerror(errno)));
      }
      return chs;
 }
