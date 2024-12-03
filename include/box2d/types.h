@@ -78,66 +78,64 @@ typedef enum b2MixingRule
 /// @ingroup world
 typedef struct b2WorldDef
 {
-	/// Gravity vector. Box2D has no up-vector defined.
+	/// 重力向量。Box2D 没有定义向上的向量。
 	b2Vec2 gravity;
 
-	/// Restitution velocity threshold, usually in m/s. Collisions above this
-	/// speed have restitution applied (will bounce).
+	/// 恢复速度阈值，通常以米/秒为单位。碰撞速度超过此阈值时，会应用恢复（即反弹）。
 	float restitutionThreshold;
 
-	/// This parameter controls how fast overlap is resolved and has units of meters per second
+	/// 该参数控制重叠解决的速度，单位是米/秒。
 	float contactPushoutVelocity;
 
-	/// Threshold velocity for hit events. Usually meters per second.
+	/// 碰撞事件的阈值速度。通常以米/秒为单位。
 	float hitEventThreshold;
 
-	/// Contact stiffness. Cycles per second.
+	/// 接触刚度。以每秒循环数为单位。
 	float contactHertz;
 
-	/// Contact bounciness. Non-dimensional.
+	/// 接触弹性。无量纲。
 	float contactDampingRatio;
 
-	/// Joint stiffness. Cycles per second.
+	/// 关节刚度。以每秒循环数为单位。
 	float jointHertz;
 
-	/// Joint bounciness. Non-dimensional.
+	/// 关节弹性。无量纲。
 	float jointDampingRatio;
 
-	/// Maximum linear velocity. Usually meters per second.
+	/// 最大线性速度。通常以米/秒为单位。
 	float maximumLinearVelocity;
 
-	/// Mixing rule for friction. Default is b2_mixGeometricMean.
+	/// 摩擦力的混合规则。默认是 b2_mixGeometricMean。
 	b2MixingRule frictionMixingRule;
 
-	/// Mixing rule for restitution. Default is b2_mixMaximum.
+	/// 恢复力的混合规则。默认是 b2_mixMaximum。
 	b2MixingRule restitutionMixingRule;
 
-	/// Can bodies go to sleep to improve performance
+	/// 是否允许物体休眠以提高性能。
 	bool enableSleep;
 
-	/// Enable continuous collision
+	/// 启用连续碰撞检测。
 	bool enableContinuous;
 
-	/// Number of workers to use with the provided task system. Box2D performs best when using only
-	/// performance cores and accessing a single L2 cache. Efficiency cores and hyper-threading provide
-	/// little benefit and may even harm performance.
+	/// 使用提供的任务系统时，使用的工作线程数。Box2D 在只使用性能核心并访问单个 L2 缓存时表现最佳。效率核心和超线程对性能几乎没有益处，甚至可能会降低性能。
 	int32_t workerCount;
 
-	/// Function to spawn tasks
+	/// 用于生成任务的函数。
 	b2EnqueueTaskCallback* enqueueTask;
 
-	/// Function to finish a task
+	/// 用于完成任务的函数。
 	b2FinishTaskCallback* finishTask;
 
-	/// User context that is provided to enqueueTask and finishTask
+	/// 提供给 enqueueTask 和 finishTask 的用户上下文。
 	void* userTaskContext;
 
-	/// User data
+	/// 用户数据。
 	void* userData;
 
-	/// Used internally to detect a valid definition. DO NOT SET.
+	/// 内部使用，用于检测有效的定义。**不要设置**。
 	int32_t internalValue;
 } b2WorldDef;
+
 
 /// Use this to initialize your world definition
 /// @ingroup world

@@ -143,7 +143,7 @@ std::string WebSocketServer::base64Encode(const std::vector<uint8_t> &input)
 void WebSocketServer::readCb(TcpConnection *tc)
 {
      std::string origin = tc->recv();
-     DEBUG(std::to_string(origin.size()));
+     // DEBUG(std::to_string(origin.size()));
      if (origin.empty())
      {
           Logger::instance().info(tc->getPeerAddr().getIpPort() + "已断开连接");
