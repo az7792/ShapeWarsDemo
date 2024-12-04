@@ -5,6 +5,7 @@
 #include "Acceptor.h"
 #include "TcpConnection.h"
 #include <vector>
+#include <csignal>
 #include <atomic>
 class TcpServer
 {

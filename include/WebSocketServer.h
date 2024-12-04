@@ -171,32 +171,34 @@ private:
 class WebSocketServer
 {
      // SHA-1
-     static std::vector<uint8_t> sha1(const std::string &message);
+     std::vector<uint8_t> sha1(const std::string &message);
      // Base64编码
-     static std::string base64Encode(const std::vector<uint8_t> &input);
+     std::string base64Encode(const std::vector<uint8_t> &input);
 
-     static void readCb(TcpConnection *tc); // 处理接受到的TCP消息
+     void readCb(TcpConnection *tc); // 处理接受到的TCP消息
 
-     static std::function<void(TcpConnection *)> onOpen;                            // 连接打开
-     static std::function<void(TcpConnection *)> onClose;                           // 关闭时
-     static std::function<void(std::string, TcpConnection *tc)> onMessage, onError; // 收到消息时/发生错误时
+     std::function<void(TcpConnection *)> onOpen;                            // 连接打开
+     std::function<void(TcpConnection *)> onClose;                           // 关闭时
+     std::function<void(std::string, TcpConnection *tc)> onMessage, onError; // 收到消息时/发生错误时
      TcpServer tcpServer;
      bool isRunning;
 
-     static const size_t MAX_CONNECTED = 100;                 // 最大连接数
-     static std::unordered_set<TcpConnection *> tcpConnected; // 管理已经连接的websocket连接
-     static void addConnect(TcpConnection *tc);                // 增加一个新连接
-     static void subConnect(TcpConnection *tc);                // 断开一个连接
+     const size_t MAX_CONNECTED = 100;                 // 最大连接数
+     std::mutex tcpConnectedMutex;                     // 同步tcpConnected的锁
+     std::unordered_set<TcpConnection *> tcpConnected; // 管理已经连接的websocket链接
+     void addConnect(TcpConnection *tc);               // 增加一个新连接
+     void subConnect(TcpConnection *tc);               // 断开一个连接
 
-     static ThreadPool threadPool; // 用于发送消息，或者处理心跳机制
+     ThreadPool threadPool; // 用于发送消息，或者处理心跳机制
 
 public:
-     static void broadcast(const std::string &message); // 群发消息
-     static bool send(const std::string &message, TcpConnection *tc);
+     void broadcast(const std::string &message); // 群发消息
+     bool send(const std::string &message, TcpConnection *tc);
      WebSocketServer(const InetAddress &addr);
-     static void setOnOpen(std::function<void(TcpConnection *)> cb);
-     static void setOnclose(std::function<void(TcpConnection *)> cb);
-     static void setOnMessage(std::function<void(std::string, TcpConnection *)> cb);
-     static void setOnError(std::function<void(std::string, TcpConnection *)> cb);
+     ~WebSocketServer();
+     void setOnOpen(std::function<void(TcpConnection *)> cb);
+     void setOnclose(std::function<void(TcpConnection *)> cb);
+     void setOnMessage(std::function<void(std::string, TcpConnection *)> cb);
+     void setOnError(std::function<void(std::string, TcpConnection *)> cb);
      void run();
 };

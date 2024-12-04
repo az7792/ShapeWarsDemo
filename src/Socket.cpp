@@ -47,7 +47,12 @@ ssize_t Socket::send(const std::string &mes)
 {
      ssize_t sentBytes = ::send(fd_, mes.c_str(), mes.size(), 0);
      if (sentBytes < 0)
-          Logger::instance().error("socketfd:" + std::to_string(fd_) + " 发送失败: " + strerror(errno));
+     {
+          if (errno == EPIPE)
+               Logger::instance().warn("socketfd:" + std::to_string(fd_) + " 发送失败: 对端已关闭");
+          else
+               Logger::instance().error("socketfd:" + std::to_string(fd_) + " 发送失败: " + strerror(errno));
+     }
      return sentBytes;
 }
 

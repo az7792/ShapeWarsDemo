@@ -13,6 +13,7 @@ TcpServer::TcpServer(const InetAddress &addr, int numSubLoop)
       mainLoop_(), acceptor_(&mainLoop_, localAddr_),
       threadPool_(numSubLoop_), subLoops_(numSubLoop_)
 {
+     signal(SIGPIPE, SIG_IGN); // 忽略 SIGPIPE 信号
      acceptor_.setNewConnectionCallback(
          std::bind(&TcpServer::newConnection, this, std::placeholders::_1, std::placeholders::_2));
 }

@@ -18,10 +18,10 @@ public:
      void setScore(int score);
 
      // 按键按下
-     void keyDown(char key);
+     void keyDown(std::string key);
 
      // 按键抬起
-     void keyUp(char key);
+     void keyUp(std::string key);
 
      void fixedUpdate() override;
 

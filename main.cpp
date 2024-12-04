@@ -12,43 +12,14 @@
 #include "WebSocketServer.h"
 #include "box2d/box2d.h"
 #include "Tank/World.h"
+#include "Tank/GameLoop.h"
 using namespace std;
-Player *player;
-void onMessage(const string msg, TcpConnection *tc)
-{
-     cout << msg << endl;
-     if (msg[0] == 'D')
-          player->keyDown(msg[1]);
-     else
-          player->keyUp(msg[1]);
-     cout << player->keyStates[0] << " ";
-     cout << player->keyStates[1] << " ";
-     cout << player->keyStates[2] << " ";
-     cout << player->keyStates[3] << endl;
-}
 int main()
 {
      Logger::instance().setLevel(LogLevel::DEBUG);
-     World world(300, 300, (b2Vec2){0.f, 0.f});
-     Player *P1 = nullptr;
-     WebSocketServer wsock(InetAddress("0.0.0.0", 7792));
-     WebSocketServer::setOnOpen([&](TcpConnection *tc)
-                                { cout << tc->getPeerAddr().getIpPort() << "已连接\n";
-                                P1 = world.addPlayer(); });
-     WebSocketServer::setOnMessage(onMessage);
-     thread WebSocketServerThread(&WebSocketServer::run, ref(wsock));
+     GameLoop gameLoop;
 
-     player = world.addPlayer();
-     while (true)
-     {
-          player->fixedUpdate();
-          world.updateWorld();
-          // cout << player->getX() << " " << player->getY() << endl;
-          if (P1 != nullptr)
-               wsock.broadcast(player->packData() + " " + P1->packData());
-          this_thread::sleep_for(std::chrono::duration<double>(world.getTimeStep()));
-     }
-
+     gameLoop.loop();
      return 0;
      // // 初始化
      // //  定义

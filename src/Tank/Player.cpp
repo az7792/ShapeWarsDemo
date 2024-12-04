@@ -25,27 +25,27 @@ void Player::setScore(int score)
      this->score = score;
 }
 
-void Player::keyDown(char key)
+void Player::keyDown(std::string key)
 {
-     if (key == 'w')
+     if (key == "w")
           keyStates[0] = 1;
-     else if (key == 'a')
+     else if (key == "a")
           keyStates[1] = 1;
-     else if (key == 's')
+     else if (key == "s")
           keyStates[2] = 1;
-     else if (key == 'd')
+     else if (key == "d")
           keyStates[3] = 1;
 }
 
-void Player::keyUp(char key)
+void Player::keyUp(std::string key)
 {
-     if (key == 'w')
+     if (key == "w")
           keyStates[0] = 0;
-     else if (key == 'a')
+     else if (key == "a")
           keyStates[1] = 0;
-     else if (key == 's')
+     else if (key == "s")
           keyStates[2] = 0;
-     else if (key == 'd')
+     else if (key == "d")
           keyStates[3] = 0;
 }
 
