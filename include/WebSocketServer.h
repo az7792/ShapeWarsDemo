@@ -3,8 +3,9 @@
 #include <stdexcept>
 #include <cstring>
 #include <functional>
-#include <map>
+#include <unordered_set>
 #include "TcpServer.h"
+#include "Tank/Player.h"
 class WebSocketFrame
 {
 public:
@@ -177,25 +178,25 @@ class WebSocketServer
      static void readCb(TcpConnection *tc); // 处理接受到的TCP消息
 
      static std::function<void(TcpConnection *)> onOpen;                            // 连接打开
-     static std::function<void(InetAddress addr)> onClose;                          // 关闭时
+     static std::function<void(TcpConnection *)> onClose;                           // 关闭时
      static std::function<void(std::string, TcpConnection *tc)> onMessage, onError; // 收到消息时/发生错误时
      TcpServer tcpServer;
      bool isRunning;
 
-     static const size_t MAX_CONNECTED = 100;           // 最大连接数
-     static std::map<int, TcpConnection *> tcpConnects; // 管理已经连接的玩家
-     static void addconnect(TcpConnection *tc);         // 增加一个新连接
-     static void subconnect(TcpConnection *tc);         // 断开一个新连接
+     static const size_t MAX_CONNECTED = 100;                 // 最大连接数
+     static std::unordered_set<TcpConnection *> tcpConnected; // 管理已经连接的websocket连接
+     static void addConnect(TcpConnection *tc);                // 增加一个新连接
+     static void subConnect(TcpConnection *tc);                // 断开一个连接
 
-     static ThreadPool threadPool;                      // 用于发送消息，或者处理心跳机制
+     static ThreadPool threadPool; // 用于发送消息，或者处理心跳机制
 
 public:
      static void broadcast(const std::string &message); // 群发消息
      static bool send(const std::string &message, TcpConnection *tc);
      WebSocketServer(const InetAddress &addr);
      static void setOnOpen(std::function<void(TcpConnection *)> cb);
-     static void setOnclose(std::function<void(InetAddress addr)> cb);
-     static void setOnMessage(std::function<void(std::string, TcpConnection *tc)> cb);
-     static void setOnError(std::function<void(std::string, TcpConnection *tc)> cb);
+     static void setOnclose(std::function<void(TcpConnection *)> cb);
+     static void setOnMessage(std::function<void(std::string, TcpConnection *)> cb);
+     static void setOnError(std::function<void(std::string, TcpConnection *)> cb);
      void run();
 };

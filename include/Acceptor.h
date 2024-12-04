@@ -9,7 +9,7 @@ class Acceptor
      Socket acceptSocket_;
      Channel acceptChannel_;
      std::function<void(int sockfd, const InetAddress &addr)> newConnectionCallback_;
-     int nowSocket();
+     int newSocket();
 
 public:
      Acceptor(EventLoop *loop, const InetAddress &listenAddr);

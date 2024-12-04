@@ -57,30 +57,18 @@ std::string Socket::recv()
      // char buffer[65536]; // 64k
      ssize_t receivedBytes = ::recv(fd_, buffer, sizeof(buffer) - 1, 0);
 
-     // std::ostringstream oss;
-     // for (int i = 0; i < receivedBytes; ++i)
-     // {
-     //      for (int bit = 7; bit >= 0; --bit) // 每个字节 8 位，从高位到低位
-     //      {
-     //           oss << ((buffer[i] >> bit) & 1);
-     //      }
-     //      oss << " ";
-     // }
-     // std::string result = oss.str();
-     // Logger::instance().debug(result);
-     // Logger::instance().debug("\n" + std::to_string(receivedBytes));
-
      if (receivedBytes < 0)
      {
-          if (errno == EAGAIN || errno == EWOULDBLOCK)
-          {
-               // 非阻塞模式下可能没有数据可读，并不一定读取错误
-               return "";
-          }
+          // if (errno == EAGAIN || errno == EWOULDBLOCK)
+          // {
+          //      // 非阻塞模式下可能没有数据可读，并不一定读取错误
+          //      return "";
+          // }
           Logger::instance().error("socketfd:" + std::to_string(fd_) + " 接收失败: " + strerror(errno));
+          // 异常断开
           return "";
      }
-     // 连接断开这儿返回的是空字符串
+     // 正常连接断开这儿返回的是空字符串
      return std::string(buffer, receivedBytes);
 }
 

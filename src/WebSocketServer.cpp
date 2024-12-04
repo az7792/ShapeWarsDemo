@@ -3,11 +3,11 @@
 #define DEBUG(x) Logger::instance().debug(x);
 
 std::function<void(TcpConnection *)> WebSocketServer::onOpen = nullptr;
-std::function<void(InetAddress)> WebSocketServer::onClose = nullptr;
+std::function<void(TcpConnection *)> WebSocketServer::onClose = nullptr;
 std::function<void(std::string, TcpConnection *)> WebSocketServer::onMessage = nullptr;
 std::function<void(std::string, TcpConnection *)> WebSocketServer::onError = nullptr;
 ThreadPool WebSocketServer::threadPool(16);
-std::map<int, TcpConnection *> WebSocketServer::tcpConnects;
+std::unordered_set<TcpConnection *> WebSocketServer::tcpConnected;
 
 std::vector<uint8_t>
 WebSocketServer::sha1(const std::string &message)
@@ -147,7 +147,9 @@ void WebSocketServer::readCb(TcpConnection *tc)
      if (origin.empty())
      {
           Logger::instance().info(tc->getPeerAddr().getIpPort() + "已断开连接");
-          subconnect(tc);
+          if (onClose)
+               onClose(tc);
+          subConnect(tc);
           return;
      }
      if (!(origin.size() >= 3 && origin.substr(0, 3) == "GET"))
@@ -159,16 +161,16 @@ void WebSocketServer::readCb(TcpConnection *tc)
                Logger::instance().error("webSocket帧解析错误");
                Logger::instance().info(tc->getPeerAddr().getIpPort() + "已断开连接");
                if (onClose)
-                    onClose(tc->getPeerAddr());
-               subconnect(tc);
+                    onClose(tc);
+               subConnect(tc);
                return;
           }
           if (frame.opcode == 0x8)
           {
                Logger::instance().info(tc->getPeerAddr().getIpPort() + "已关闭连接");
                if (onClose)
-                    onClose(tc->getPeerAddr());
-               subconnect(tc);
+                    onClose(tc);
+               subConnect(tc);
                return;
           }
           if (onMessage)
@@ -207,32 +209,32 @@ void WebSocketServer::readCb(TcpConnection *tc)
           tc->send(response);
 
           // 标记连接建立完成
-          addconnect(tc);
+          addConnect(tc);
           if (onOpen)
                onOpen(tc);
           Logger::instance().info(tc->getPeerAddr().getIpPort() + "WebSocket已连接");
      }
 }
 
-void WebSocketServer::addconnect(TcpConnection *tc)
+void WebSocketServer::addConnect(TcpConnection *tc)
 {
      if (tc != nullptr)
      {
-          if (tcpConnects.size() >= MAX_CONNECTED)
+          if (tcpConnected.size() >= MAX_CONNECTED)
           {
                delete tc;
                tc = nullptr;
           }
           else
-               tcpConnects[tc->getSocket()->getFd()] = tc;
+               tcpConnected.emplace(tc);
      }
 }
 
-void WebSocketServer::subconnect(TcpConnection *tc)
+void WebSocketServer::subConnect(TcpConnection *tc)
 {
      if (tc != nullptr)
      {
-          tcpConnects.erase(tc->getSocket()->getFd());
+          tcpConnected.erase(tc);
           delete tc;
           tc = nullptr;
      }
@@ -240,18 +242,21 @@ void WebSocketServer::subconnect(TcpConnection *tc)
 
 void WebSocketServer::broadcast(const std::string &message)
 {
-     for (auto &v : tcpConnects)
+     for (auto &v : tcpConnected)
      {
-          send(message, v.second);
+          send(message, v);
      }
 }
 
 bool WebSocketServer::send(const std::string &message, TcpConnection *tc)
 {
-     int sendNum = threadPool.submit(&TcpConnection::send, tc, WebSocketFrame::encode(1, 0x1, 0, message)).get();
-     if (sendNum == 0)
+     int sendNum = tc->send(WebSocketFrame::encode(1, 0x1, 0, message));
+     if (sendNum <= 0)
      {
           Logger::instance().warn("发送失败," + tc->getPeerAddr().getIpPort() + "已断开连接");
+          if (onClose)
+               onClose(tc);
+          subConnect(tc);
      }
      return sendNum > 0;
 }
@@ -268,17 +273,17 @@ void WebSocketServer::setOnOpen(std::function<void(TcpConnection *)> cb)
      onOpen = cb;
 }
 
-void WebSocketServer::setOnclose(std::function<void(InetAddress)> cb)
+void WebSocketServer::setOnclose(std::function<void(TcpConnection *)> cb)
 {
      onClose = cb;
 }
 
-void WebSocketServer::setOnMessage(std::function<void(std::string, TcpConnection *tc)> cb)
+void WebSocketServer::setOnMessage(std::function<void(std::string, TcpConnection *)> cb)
 {
      onMessage = cb;
 }
 
-void WebSocketServer::setOnError(std::function<void(std::string, TcpConnection *tc)> cb)
+void WebSocketServer::setOnError(std::function<void(std::string, TcpConnection *)> cb)
 {
      onError = cb;
 }

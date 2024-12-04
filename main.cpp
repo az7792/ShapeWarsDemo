@@ -29,20 +29,23 @@ void onMessage(const string msg, TcpConnection *tc)
 int main()
 {
      Logger::instance().setLevel(LogLevel::DEBUG);
+     World world(300, 300, (b2Vec2){0.f, 0.f});
+     Player *P1 = nullptr;
      WebSocketServer wsock(InetAddress("0.0.0.0", 7792));
-     WebSocketServer::setOnOpen([](TcpConnection *tc)
-                                { cout << tc->getPeerAddr().getIpPort() << "已连接\n"; });
+     WebSocketServer::setOnOpen([&](TcpConnection *tc)
+                                { cout << tc->getPeerAddr().getIpPort() << "已连接\n";
+                                P1 = world.addPlayer(); });
      WebSocketServer::setOnMessage(onMessage);
      thread WebSocketServerThread(&WebSocketServer::run, ref(wsock));
 
-     World world(300, 300, (b2Vec2){0.f, 0.f});
      player = world.addPlayer();
      while (true)
      {
           player->fixedUpdate();
           world.updateWorld();
           // cout << player->getX() << " " << player->getY() << endl;
-          wsock.broadcast(player->packData());
+          if (P1 != nullptr)
+               wsock.broadcast(player->packData() + " " + P1->packData());
           this_thread::sleep_for(std::chrono::duration<double>(world.getTimeStep()));
      }
 

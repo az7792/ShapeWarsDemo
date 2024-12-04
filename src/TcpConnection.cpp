@@ -24,12 +24,20 @@ int TcpConnection::send(const std::string &buf)
 {
      if (status_ == TcpConnectionStatus::Disconnected)
           return 0;
-     return sock_->send(buf);
+     int t = sock_->send(buf);
+     if (t <= 0)
+          close();
+     return t;
 }
 
 std::string TcpConnection::recv()
 {
-     return sock_->recv();
+     if (status_ == TcpConnectionStatus::Disconnected)
+          return "";
+     std::string t = sock_->recv();
+     if (t.empty())
+          close();
+     return t;
 }
 
 void TcpConnection::close()

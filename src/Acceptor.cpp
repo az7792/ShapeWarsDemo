@@ -1,6 +1,6 @@
 #include "Acceptor.h"
 
-Acceptor::Acceptor(EventLoop *loop, const InetAddress &listenAddr) : mainLoop_(loop), acceptSocket_(nowSocket()),
+Acceptor::Acceptor(EventLoop *loop, const InetAddress &listenAddr) : mainLoop_(loop), acceptSocket_(newSocket()),
                                                                      acceptChannel_(loop, acceptSocket_.getFd())
 {
      acceptSocket_.setReuseAddr(true);
@@ -23,7 +23,7 @@ void Acceptor::handleRead()
      newConnectionCallback_(cfd, addr);
 }
 
-int Acceptor::nowSocket()
+int Acceptor::newSocket()
 {
      int fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
      if (fd < 0)
