@@ -10,7 +10,7 @@ private:
 
 public:
      bool keyStates[4] = {0, 0, 0, 0}; // w a s d是否按下
-     Player(int health, float size, b2BodyId bodyId, std::mutex &worldMutex);
+     Player(int maxHealth, float size, b2BodyId bodyId, std::mutex &worldMutex);
 
      int getGold();
      int getScore();
@@ -25,5 +25,5 @@ public:
 
      void fixedUpdate() override;
 
-     std::string packData() const override;
+     std::string packData() override;
 };

@@ -247,7 +247,7 @@ void WebSocketServer::broadcast(const std::string &message)
 
 bool WebSocketServer::send(const std::string &message, TcpConnection *tc)
 {
-     int sendNum = tc->send(WebSocketFrame::encode(1, 0x1, 0, message));
+     int sendNum = tc->send(WebSocketFrame::encode(1, 0x2, 0, message));
      if (sendNum <= 0)
      {
           std::cout << tc << std::endl;

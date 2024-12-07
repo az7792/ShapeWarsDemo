@@ -1,7 +1,7 @@
 #include "Tank/GameObject.h"
 
-GameObject::GameObject(int health, b2BodyId bodyId, std::mutex &worldMutex)
-    : health(health), bodyId(bodyId), worldMutex(worldMutex) {}
+GameObject::GameObject(int maxHealth, b2BodyId bodyId, std::mutex &worldMutex)
+    : health(maxHealth), maxHealth(maxHealth), bodyId(bodyId), worldMutex(worldMutex) {}
 
 GameObject::~GameObject()
 {
@@ -20,6 +20,7 @@ void GameObject::fixedUpdate()
           velocity.y *= scale;
           setVelocity(velocity);
      }
+     isPacked = false;
 }
 
 float GameObject::getX() const
@@ -51,6 +52,10 @@ int GameObject::getHealth() const
      return health;
 }
 
+int GameObject::getMaxHealth() const
+{
+     return maxHealth;
+}
 b2Vec2 GameObject::getVelocity()
 {
      return b2Body_GetLinearVelocity(bodyId);
@@ -64,6 +69,11 @@ b2BodyId GameObject::getBodyId() const
 void GameObject::setHealth(int value)
 {
      health = value;
+}
+
+void GameObject::setMaxHealth(int value)
+{
+     maxHealth = value;
 }
 
 void GameObject::setVelocity(b2Vec2 velocity)

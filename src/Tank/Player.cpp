@@ -1,7 +1,7 @@
 #include "Tank/Player.h"
 
-Player::Player(int health, float size, b2BodyId bodyId, std::mutex &worldMutex)
-    : GameObject(health, bodyId, worldMutex), gold(0), score(0), size(size)
+Player::Player(int maxHealth, float size, b2BodyId bodyId, std::mutex &worldMutex)
+    : GameObject(maxHealth, bodyId, worldMutex), gold(0), score(0), size(size)
 {
 }
 
@@ -82,10 +82,45 @@ void Player::fixedUpdate()
      b2Body_ApplyForceToCenter(bodyId, force, true);
 }
 
-std::string Player::packData() const
+std::string Player::packData()
 {
-     std::ostringstream oss;
+     if (isPacked)
+     {
+          return std::string(dataBuf, dataBufLen);
+     }
+     dataBufLen = 0;
+     // 血量
+     std::memcpy(dataBuf + dataBufLen, &health, 4);
+     dataBufLen += 4;
+     // 最大血量
+     std::memcpy(dataBuf + dataBufLen, &maxHealth, 4);
+     dataBufLen += 4;
+     // 金币
+     std::memcpy(dataBuf + dataBufLen, &gold, 4);
+     dataBufLen += 4;
+     // 得分
+     std::memcpy(dataBuf + dataBufLen, &score, 4);
+     dataBufLen += 4;
+
+     // 几何体
+     // 类型
+     dataBuf[dataBufLen++] = 0x00; // 圆形
+
      b2Vec2 pos = getPosition();
-     oss << "0 " << pos.x << " " << pos.y << " " << getAngle() << " " << size;
-     return oss.str();
+     float angle = getAngle();
+     // X坐标
+     std::memcpy(dataBuf + dataBufLen, &pos.x, 4);
+     dataBufLen += 4;
+     // Y坐标
+     std::memcpy(dataBuf + dataBufLen, &pos.y, 4);
+     dataBufLen += 4;
+     // 旋转角度
+     std::memcpy(dataBuf + dataBufLen, &angle, 4);
+     dataBufLen += 4;
+     // 属性
+     // 半径
+     std::memcpy(dataBuf + dataBufLen, &size, 4);
+     dataBufLen += 4;
+     isPacked = true;
+     return std::string(dataBuf, dataBufLen);
 }
