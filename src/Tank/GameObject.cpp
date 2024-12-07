@@ -61,6 +61,10 @@ b2Vec2 GameObject::getVelocity()
      return b2Body_GetLinearVelocity(bodyId);
 }
 
+bool GameObject::getIsVisible() const
+{
+     return isVisible;
+}
 b2BodyId GameObject::getBodyId() const
 {
      return bodyId;
@@ -86,4 +90,14 @@ void GameObject::setMaxVelocity(float velocity)
 {
      if (velocity >= 0)
           maxVelocity = velocity;
+}
+
+void GameObject::initGroupIndex(int32_t value)
+{
+     groupIndex = value;
+}
+
+void GameObject::setIsVisible(bool v)
+{
+     isVisible = v;
 }

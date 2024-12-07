@@ -1,8 +1,16 @@
 #pragma once
-#include "../box2d/box2d.h"
+#include "box2d/box2d.h"
 #include <mutex>
 #include <string>
 #include <cstring>
+enum class MyCategories // uint32
+{
+     PLAYER = 0x00000001,
+     BULLET = 0x00000002,
+     RESOURCE_BLOCK = 0x00000004,
+     BORDER_WALL = 0x00000008,
+     CAMERA = 0x00000010,
+};
 class GameObject
 {
 protected:
@@ -17,6 +25,10 @@ protected:
      bool isPacked = false;    // 是否已经打包好数据
      int dataBufLen = 0;       // 包的长度
      float maxVelocity = 0.5f; // 最大线速度 m/s *并不是玩家控制的移动速度
+
+     int32_t groupIndex = 0; // 物体所在碰撞组(默认不在任何组)
+
+     bool isVisible = true;
 
 public:
      GameObject(int maxHealth, b2BodyId bodyId, std::mutex &worldMutex);
@@ -45,6 +57,7 @@ public:
      float getAngle() const;
      // 获取线速度
      b2Vec2 getVelocity();
+     bool getIsVisible() const;
 
      void setHealth(int value);
      void setMaxHealth(int value);
@@ -52,4 +65,8 @@ public:
      void setVelocity(b2Vec2 velocity);
      // 设置最大线速度
      void setMaxVelocity(float velocity);
+     // 初始化groupIndex
+     void initGroupIndex(int32_t value);
+
+     void setIsVisible(bool v);
 };

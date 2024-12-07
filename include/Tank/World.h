@@ -11,6 +11,9 @@ private:
      std::mutex worldMutex;       // 保护世界状态的锁
      float timeStep = 1.f / 60.f; // 帧间隔
 
+     int32_t positiveGroupIndex = 1;
+     int32_t negativeGroupIndex = -1;
+
 public:
      World(b2Vec2 gravity);
      World(float w, float h, b2Vec2 gravity); // 创建一个2w * 2h的世界(单位为米)

@@ -238,10 +238,11 @@ B2_API b2BodyDef b2DefaultBodyDef( void );
 /// This is used to filter collision on shapes. It affects shape-vs-shape collision
 /// and shape-versus-query collision (such as b2World_CastRay).
 /// @ingroup shape
+/// 这是用于过滤形状间碰撞的结构体。它影响形状与形状的碰撞以及形状与查询的碰撞（如 b2World_CastRay）。
+/// @ingroup shape
 typedef struct b2Filter
 {
-	/// The collision category bits. Normally you would just set one bit. The category bits should
-	/// represent your application object types. For example:
+	/// 碰撞类别位。通常你只会设置一个位。类别位应该代表应用程序中的物体类型。例如：
 	/// @code{.cpp}
 	/// enum MyCategories
 	/// {
@@ -249,26 +250,22 @@ typedef struct b2Filter
 	///    Dynamic = 0x00000002,
 	///    Debris  = 0x00000004,
 	///    Player  = 0x00000008,
-	///    // etc
+	///    // 等等
 	/// };
 	/// @endcode
 	uint64_t categoryBits;
 
-	/// The collision mask bits. This states the categories that this
-	/// shape would accept for collision.
-	/// For example, you may want your player to only collide with static objects
-	/// and other players.
+	/// 碰撞掩码位。它表示此形状可以接受哪些类别的碰撞。
+	/// 例如，你可能希望你的玩家只与静态物体和其他玩家发生碰撞。
 	/// @code{.c}
 	/// maskBits = Static | Player;
 	/// @endcode
 	uint64_t maskBits;
 
-	/// Collision groups allow a certain group of objects to never collide (negative)
-	/// or always collide (positive). A group index of zero has no effect. Non-zero group filtering
-	/// always wins against the mask bits.
-	/// For example, you may want ragdolls to collide with other ragdolls but you don't want
-	/// ragdoll self-collision. In this case you would give each ragdoll a unique negative group index
-	/// and apply that group index to all shapes on the ragdoll.
+	/// 碰撞组允许某一组物体永不碰撞（负数）或总是碰撞（正数）。组索引为零时没有效果。
+	/// 非零组过滤优先于掩码位。
+	/// 例如，你可能希望布娃娃与其他布娃娃碰撞，但不希望布娃娃之间发生自碰撞。
+	/// 在这种情况下，你可以为每个布娃娃分配一个唯一的负组索引，并将该组索引应用于布娃娃的所有形状。
 	int32_t groupIndex;
 } b2Filter;
 
@@ -276,19 +273,19 @@ typedef struct b2Filter
 /// @ingroup shape
 B2_API b2Filter b2DefaultFilter( void );
 
-/// The query filter is used to filter collisions between queries and shapes. For example,
-/// you may want a ray-cast representing a projectile to hit players and the static environment
-/// but not debris.
+/// 查询过滤器用于过滤查询和形状之间的碰撞。例如，
+/// 你可能希望一个表示投射物的射线与玩家和静态环境发生碰撞，
+/// 但不与碎片发生碰撞。
 /// @ingroup shape
 typedef struct b2QueryFilter
 {
-	/// The collision category bits of this query. Normally you would just set one bit.
+	/// 此查询的碰撞类别位。通常你只会设置一个位。
 	uint64_t categoryBits;
 
-	/// The collision mask bits. This states the shape categories that this
-	/// query would accept for collision.
+	/// 碰撞掩码位。它表示此查询接受的形状类别进行碰撞。
 	uint64_t maskBits;
 } b2QueryFilter;
+
 
 /// Use this to initialize your query filter
 /// @ingroup shape
@@ -1145,12 +1142,13 @@ typedef bool b2CustomFilterFcn( b2ShapeId shapeIdA, b2ShapeId shapeIdB, void* co
 /// @ingroup world
 typedef bool b2PreSolveFcn( b2ShapeId shapeIdA, b2ShapeId shapeIdB, b2Manifold* manifold, void* context );
 
-/// Prototype callback for overlap queries.
-/// Called for each shape found in the query.
+/// 重叠查询的原型回调函数。
+/// 为查询中找到的每个形状调用。
 /// @see b2World_QueryAABB
-/// @return false to terminate the query.
+/// @return 返回 false 以终止查询。
 /// @ingroup world
 typedef bool b2OverlapResultFcn( b2ShapeId shapeId, void* context );
+
 
 /// Prototype callback for ray casts.
 /// Called for each shape found in the query. You control how the ray cast

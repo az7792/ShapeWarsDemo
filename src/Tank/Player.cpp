@@ -3,6 +3,13 @@
 Player::Player(int maxHealth, float size, b2BodyId bodyId, std::mutex &worldMutex)
     : GameObject(maxHealth, bodyId, worldMutex), gold(0), score(0), size(size)
 {
+     b2Vec2 pos = this->getPosition();
+     camera = new Camera(pos.x, pos.y, 1, 0.5, this);
+}
+
+Player::~Player()
+{
+     delete camera;
 }
 
 int Player::getGold()
@@ -123,4 +130,10 @@ std::string Player::packData()
      dataBufLen += 4;
      isPacked = true;
      return std::string(dataBuf, dataBufLen);
+}
+
+std::string Player::getFrameData()
+{
+     camera->setPosition(this->getPosition());
+     return camera->getFrameData();
 }

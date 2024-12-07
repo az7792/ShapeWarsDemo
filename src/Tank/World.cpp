@@ -20,6 +20,10 @@ World::World(float w, float h, b2Vec2 gravity = (b2Vec2){0, 0})
      bodyDef.position = (b2Vec2){0.f, 0.f};
      b2BodyId Wall = b2CreateBody(worldId, &bodyDef);
      b2ShapeDef shapeDef = b2DefaultShapeDef(); // 默认为静态
+     shapeDef.filter.categoryBits = (uint64_t)MyCategories::BORDER_WALL;
+     shapeDef.filter.maskBits = (uint64_t)MyCategories::PLAYER |
+                                (uint64_t)MyCategories::BULLET |
+                                (uint64_t)MyCategories::RESOURCE_BLOCK;
      // up
      s.point1 = (b2Vec2){-w, h};
      s.point2 = (b2Vec2){w, h};
@@ -81,7 +85,12 @@ Player *World::addPlayer()
      b2ShapeDef shapeDef = b2DefaultShapeDef();
      shapeDef.density = 1.f;   // 默认为1
      shapeDef.friction = 0.1f; // 动态物体需要设置密度和摩擦系数
-
+     shapeDef.filter.categoryBits = (uint64_t)MyCategories::PLAYER;
+     shapeDef.filter.maskBits = (uint64_t)MyCategories::BORDER_WALL |
+                                (uint64_t)MyCategories::BULLET |
+                                (uint64_t)MyCategories::RESOURCE_BLOCK |
+                                (uint64_t)MyCategories::CAMERA;
+     shapeDef.filter.groupIndex = negativeGroupIndex--;
      // 圆形
      b2Circle circle;
      circle.center = bodyDef.position;
@@ -90,6 +99,7 @@ Player *World::addPlayer()
      b2CreateCircleShape(bodyId, &shapeDef, &circle);
 
      Player *player = new Player(100, circle.radius, bodyId, worldMutex);
+     player->initGroupIndex(shapeDef.filter.groupIndex);
      b2Body_SetUserData(bodyId, (void *)player);
      return player;
 }

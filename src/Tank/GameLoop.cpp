@@ -73,13 +73,14 @@ void GameLoop::loop()
                std::unique_lock<std::shared_mutex> lock(playersSharedMutex); // 写
                for (auto it = players.begin(); it != players.end();)
                {
-                    bool ok = webSocketServer.send((*it).second->packData(), (*it).first);
+                    bool ok = webSocketServer.send((*it).second->getFrameData(), (*it).first);
                     if (ok)
                          ++it;
                     else
                     {
                          world.removeBody((*it).second);
                          it = players.erase(it);
+                         Logger::instance().info("销毁成功");
                     }
                }
           }

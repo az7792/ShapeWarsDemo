@@ -1,5 +1,7 @@
 #pragma once
 #include "GameObject.h"
+#include "Camera.h"
+class Camera;
 class Player : public GameObject
 {
 private:
@@ -7,11 +9,12 @@ private:
      int score;              // 积分
      float size;             // 大小(半径单位米)
      float moveForce = 0.1f; // 单位 N
+     Camera *camera = nullptr;
 
 public:
      bool keyStates[4] = {0, 0, 0, 0}; // w a s d是否按下
      Player(int maxHealth, float size, b2BodyId bodyId, std::mutex &worldMutex);
-
+     ~Player();
      int getGold();
      int getScore();
      void setGold(int gold);
@@ -26,4 +29,6 @@ public:
      void fixedUpdate() override;
 
      std::string packData() override;
+
+     std::string getFrameData();
 };
