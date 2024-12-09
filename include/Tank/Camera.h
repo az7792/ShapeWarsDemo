@@ -11,7 +11,6 @@ class Camera
      std::string objectData;
 
      uint16_t scale = 500;
-     uint16_t playerNum;
 
 public:
      // 摄像机中心坐标(x,y)，宽高(2*w,2*h)
@@ -29,5 +28,4 @@ public:
      std::string &getObjectData();
 
      std::string getFrameData();
-     void playerNumAdd();
 };

@@ -96,6 +96,14 @@ std::string Player::packData()
           return std::string(dataBuf, dataBufLen);
      }
      dataBufLen = 0;
+     // 标识符
+     uint8_t mark = 2;
+     std::memcpy(dataBuf + dataBufLen, &mark, 1);
+     dataBufLen += 1;
+     // ID
+     uint64_t ID = b2StoreBodyId(bodyId);
+     std::memcpy(dataBuf + dataBufLen, &ID, 8);
+     dataBufLen += 8;
      // 血量
      std::memcpy(dataBuf + dataBufLen, &health, 4);
      dataBufLen += 4;

@@ -38,7 +38,17 @@ void GameLoop::handleOnMessage(const std::string msg, TcpConnection *tc)
           {
                std::unique_lock<std::shared_mutex> lock(playersSharedMutex); // 写
                players[tc] = world.addPlayer();
+               // 返回创建的角色ID
+               std::string strData;
+               strData.push_back((uint8_t)0x01);
+               strData.push_back((uint8_t)0x03);
+               uint64_t ID = b2StoreBodyId(players[tc]->getBodyId());
+               char tmpCh[8];
+               std::memcpy(tmpCh, &ID, 8);
+               strData += std::string(tmpCh, 8);
+               webSocketServer.send(strData, tc);
                Logger::instance().info("创建角色成功");
+               std::cout << "palyer num: " << players.size() << std::endl;
           }
           else
           {
@@ -49,7 +59,7 @@ void GameLoop::handleOnMessage(const std::string msg, TcpConnection *tc)
      }
 }
 
-GameLoop::GameLoop() : world(10,10, (b2Vec2){0.f, 0.f}),
+GameLoop::GameLoop() : world(10, 10, (b2Vec2){0.f, 0.f}),
                        webSocketServer(InetAddress("0.0.0.0", 7792))
 {
      webSocketServer.setOnOpen(std::bind(&GameLoop::handleOnOpen, this, std::placeholders::_1));
@@ -81,6 +91,7 @@ void GameLoop::loop()
                          world.removeBody((*it).second);
                          it = players.erase(it);
                          Logger::instance().info("销毁成功");
+                         std::cout << "palyer num: " << players.size() << std::endl;
                     }
                }
           }
