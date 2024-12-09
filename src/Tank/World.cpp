@@ -94,7 +94,7 @@ Player *World::addPlayer()
      // 圆形
      b2Circle circle;
      circle.center = bodyDef.position;
-     circle.radius = 0.1f;
+     circle.radius = 0.05f;
 
      b2CreateCircleShape(bodyId, &shapeDef, &circle);
 

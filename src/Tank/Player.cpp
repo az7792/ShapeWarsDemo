@@ -4,7 +4,7 @@ Player::Player(int maxHealth, float size, b2BodyId bodyId, std::mutex &worldMute
     : GameObject(maxHealth, bodyId, worldMutex), gold(0), score(0), size(size)
 {
      b2Vec2 pos = this->getPosition();
-     camera = new Camera(pos.x, pos.y, 1, 0.5, this);
+     camera = new Camera(pos.x, pos.y, 5.1, 2.9, this);
 }
 
 Player::~Player()

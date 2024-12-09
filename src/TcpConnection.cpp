@@ -6,6 +6,7 @@ TcpConnection::TcpConnection(EventLoop *loop, InetAddress localAddr, InetAddress
       sock_(new Socket(fd)), channel_(new Channel(loop, fd)),
       status_(TcpConnectionStatus::Disconnected)
 {
+     sock_->setTcpNoDelay(true);
      channel_->enableReading();
      // channel_->enableWriting();
      channel_->setReadCallback(std::bind(&TcpConnection::handleRead, this));
