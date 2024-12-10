@@ -79,6 +79,7 @@ Player *World::addPlayer()
      b2BodyDef bodyDef = b2DefaultBodyDef();
      bodyDef.type = b2_dynamicBody;
      bodyDef.position = (b2Vec2){0.f, 0.f};
+     bodyDef.linearDamping = 10.0f;
 
      b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
 
@@ -93,7 +94,7 @@ Player *World::addPlayer()
      shapeDef.filter.groupIndex = negativeGroupIndex--;
      // 圆形
      b2Circle circle;
-     circle.center = bodyDef.position;
+     circle.center = b2Vec2_zero; // 这个坐标是相对bodyDef.position而言的偏移量
      circle.radius = 0.05f;
 
      b2CreateCircleShape(bodyId, &shapeDef, &circle);

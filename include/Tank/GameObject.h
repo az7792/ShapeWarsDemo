@@ -24,7 +24,7 @@ protected:
      char dataBuf[4096];       // 数据包
      bool isPacked = false;    // 是否已经打包好数据
      int dataBufLen = 0;       // 包的长度
-     float maxVelocity = 0.3f; // 最大线速度 m/s *并不是玩家控制的移动速度
+     float maxVelocity = 0.5f; // 最大线速度 m/s *并不是玩家控制的移动速度
 
      int32_t groupIndex = 0; // 物体所在碰撞组(默认不在任何组)
 
