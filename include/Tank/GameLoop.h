@@ -5,8 +5,9 @@
 #include <shared_mutex>
 enum class MessageType : uint8_t
 {
-     WorldPositionInfo = 1,    // 1: 世界位置原始信息
-     PlayerInteractionInfo = 2 // 2: 玩家交互信息
+     WorldPositionInfo = 1,     // 1: 世界位置原始信息
+     PlayerInteractionInfo = 2, // 2: 玩家交互信息
+     Ping = 3,                  // 3：Ping,客户端测试延迟用的
 };
 
 enum class ObjectType : uint8_t

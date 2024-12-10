@@ -54,8 +54,9 @@ void GameLoop::handleOnMessage(const std::string msg, TcpConnection *tc)
           {
           }
      }
-     else
+     else if (messageType == MessageType::Ping)
      {
+          webSocketServer.send(msg, tc);
      }
 }
 

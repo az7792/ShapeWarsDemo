@@ -153,10 +153,16 @@ void WebSocketServer::readCb(TcpConnection *tc)
                subConnect(tc);
                return;
           }
-          if (frame.opcode == 0x8)
+          if (frame.opcode == 0x8) // 关闭帧
           {
                Logger::instance().info("[ websocket ]" + tc->getPeerAddr().getIpPort() + "已关闭连接");
                subConnect(tc);
+               return;
+          }
+          if (frame.opcode == 0x9) // Ping帧
+          {
+               std::string Pong = WebSocketFrame::encode(1, 0xA, 0, ""); // 返回Pong帧
+               this->send(Pong, tc);
                return;
           }
           if (onMessage)
@@ -250,7 +256,6 @@ bool WebSocketServer::send(const std::string &message, TcpConnection *tc)
      int sendNum = tc->send(WebSocketFrame::encode(1, 0x2, 0, message));
      if (sendNum <= 0)
      {
-          std::cout << tc << std::endl;
           Logger::instance().warn("[ websocket ]发送失败," + tc->getPeerAddr().getIpPort() + "已断开连接");
           subConnect(tc);
      }
