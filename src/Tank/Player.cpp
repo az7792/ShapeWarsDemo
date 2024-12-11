@@ -5,11 +5,15 @@ Player::Player(int maxHealth, float size, b2BodyId bodyId, std::mutex &worldMute
 {
      b2Vec2 pos = this->getPosition();
      camera = new Camera(pos.x, pos.y, 5.1, 2.9, this);
+     // 初始时自带一个普通炮管
+     barrels.emplace_back(new Barrel(0.04, 0.1));
 }
 
 Player::~Player()
 {
      delete camera;
+     for (auto &v : barrels)
+          delete v;
 }
 
 int Player::getGold()
@@ -56,9 +60,23 @@ void Player::keyUp(std::string key)
           keyStates[3] = 0;
 }
 
+void Player::aim(float angle)
+{
+     for (auto &v : barrels)
+     {
+          v->setAngle(angle);
+     }
+}
+
 void Player::fixedUpdate()
 {
      GameObject::fixedUpdate();
+     // 重置炮管的打包状态
+     for (auto &v : barrels)
+     {
+          v->resetPackedStatus();
+     }
+
      int moveX = keyStates[3] - keyStates[1];
      int moveY = keyStates[0] - keyStates[2];
 
@@ -136,6 +154,15 @@ std::string Player::packData()
      // 半径
      std::memcpy(dataBuf + dataBufLen, &size, 4);
      dataBufLen += 4;
+
+     // 炮管
+     for (auto &barrel : barrels)
+     {
+          std::string tmpstr = barrel->packData();
+          std::memcpy(dataBuf + dataBufLen, tmpstr.c_str(), tmpstr.size());
+          dataBufLen += tmpstr.size();
+     }
+
      isPacked = true;
      return std::string(dataBuf, dataBufLen);
 }

@@ -99,7 +99,7 @@
 
 通过uint8表示交互的类型
 
-- 0 : 鼠标移动：(X，Y)(int16，int16)
+- 0 : 鼠标移动：(angle)(float)
 - 1 : 鼠标按下(发射子弹)：(X，Y)(int16，int16)
 - 2 : 键盘按下：String
 - 3 : 键盘抬起：String

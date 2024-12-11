@@ -10,6 +10,9 @@ void GameLoop::handleOnClose(TcpConnection *tc)
 
 void GameLoop::handleOnMessage(const std::string msg, TcpConnection *tc)
 {
+
+     webSocketServer.send(msg, tc);
+     return;
      if (msg.empty())
           return;
      MessageType messageType = static_cast<MessageType>(msg[0]);
@@ -18,6 +21,10 @@ void GameLoop::handleOnMessage(const std::string msg, TcpConnection *tc)
           OperationType operationType = static_cast<OperationType>(msg[1]);
           if (operationType == OperationType::MouseMove)
           {
+               float tmpangle;
+               std::memcpy(&tmpangle, msg.data() + 2, 4);
+               if (players.find(tc) != players.end())
+                    players[tc]->aim(tmpangle);
           }
           else if (operationType == OperationType::MouseDown)
           {

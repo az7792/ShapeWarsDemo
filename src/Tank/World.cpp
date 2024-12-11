@@ -90,7 +90,8 @@ Player *World::addPlayer()
      shapeDef.filter.maskBits = (uint64_t)MyCategories::BORDER_WALL |
                                 (uint64_t)MyCategories::BULLET |
                                 (uint64_t)MyCategories::RESOURCE_BLOCK |
-                                (uint64_t)MyCategories::CAMERA;
+                                (uint64_t)MyCategories::CAMERA |
+                                (uint64_t)MyCategories::PLAYER;
      shapeDef.filter.groupIndex = negativeGroupIndex--;
      // 圆形
      b2Circle circle;
