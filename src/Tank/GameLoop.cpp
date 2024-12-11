@@ -10,9 +10,6 @@ void GameLoop::handleOnClose(TcpConnection *tc)
 
 void GameLoop::handleOnMessage(const std::string msg, TcpConnection *tc)
 {
-
-     webSocketServer.send(msg, tc);
-     return;
      if (msg.empty())
           return;
      MessageType messageType = static_cast<MessageType>(msg[0]);
@@ -67,7 +64,7 @@ void GameLoop::handleOnMessage(const std::string msg, TcpConnection *tc)
      }
 }
 
-GameLoop::GameLoop() : world(10, 10, (b2Vec2){0.f, 0.f}),
+GameLoop::GameLoop() : world(5, 5, (b2Vec2){0.f, 0.f}),
                        webSocketServer(InetAddress("0.0.0.0", 7792))
 {
      webSocketServer.setOnOpen(std::bind(&GameLoop::handleOnOpen, this, std::placeholders::_1));
