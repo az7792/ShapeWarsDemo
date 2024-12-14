@@ -21,11 +21,8 @@ enum class ObjectType : uint8_t
 
 enum class OperationType : uint8_t
 {
-     MouseMove = 0,      // 0 : 鼠标移动
-     MouseDown = 1,      // 1 : 鼠标按下
-     KeyDown = 2,        // 2 : 键盘按下
-     KeyUp = 3,          // 3 : 键盘抬起
-     CreateCharacter = 4 // 4 : 新建初始角色
+     PlayerOperation = 0, // 1 : 玩家操作
+     CreateCharacter = 1  // 1 : 新建初始角色
 };
 
 class GameLoop

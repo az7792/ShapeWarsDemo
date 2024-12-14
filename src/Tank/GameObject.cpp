@@ -10,8 +10,46 @@ GameObject::~GameObject()
           b2DestroyBody(bodyId);
 }
 
+void GameObject::takeDamage(GameObject *obj)
+{
+     if (obj->getDefend() >= damage) // 完全减伤
+          return;
+     int H = obj->getHealth();
+     H -= damage - obj->getDefend();
+     obj->setHealth(H);
+}
+
+void GameObject::addDamageTarget(GameObject *obj)
+{
+     damageTargets.push_back(obj);
+}
+
+void GameObject::removeDamageTarget(GameObject *obj)
+{
+     auto it = std::find(damageTargets.begin(), damageTargets.end(), obj); // O(n)，n一般来说很小(<10)
+     if (it != damageTargets.end())
+     {
+          std::swap(*it, damageTargets.back());
+          damageTargets.pop_back();
+     }
+}
+
 void GameObject::fixedUpdate()
 {
+     // 伤害判定
+     for (int i = 0; i < static_cast<int>(damageTargets.size());)
+     {
+          takeDamage(damageTargets[i]);
+          if (damageTargets[i]->getIsDead())
+          {
+               std::swap(damageTargets[i], damageTargets.back());
+               damageTargets.pop_back();
+          }
+          else
+               ++i;
+     }
+
+     // 控制线速度
      b2Vec2 velocity = getVelocity();
      if (velocity.x * velocity.x + velocity.y * velocity.y > maxVelocity * maxVelocity)
      {
@@ -20,6 +58,8 @@ void GameObject::fixedUpdate()
           velocity.y *= scale;
           setVelocity(velocity);
      }
+
+     // 重置打包状态
      isPacked = false;
 }
 
@@ -56,6 +96,7 @@ int GameObject::getMaxHealth() const
 {
      return maxHealth;
 }
+
 b2Vec2 GameObject::getVelocity()
 {
      return b2Body_GetLinearVelocity(bodyId);
@@ -65,6 +106,17 @@ bool GameObject::getIsVisible() const
 {
      return isVisible;
 }
+
+int GameObject::getDefend() const
+{
+     return defend;
+}
+
+int GameObject::getDamage() const
+{
+     return damage;
+}
+
 b2BodyId GameObject::getBodyId() const
 {
      return bodyId;
@@ -100,4 +152,19 @@ void GameObject::initGroupIndex(int32_t value)
 void GameObject::setIsVisible(bool v)
 {
      isVisible = v;
+}
+
+void GameObject::setDamage(int v)
+{
+     damage = v;
+}
+
+void GameObject::setDefend(int v)
+{
+     defend = v;
+}
+
+bool GameObject::getIsDead() const
+{
+     return health <= 0;
 }

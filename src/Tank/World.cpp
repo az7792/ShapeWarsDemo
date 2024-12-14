@@ -19,6 +19,12 @@ World::World(float w, float h, b2Vec2 gravity = (b2Vec2){0, 0})
      b2BodyDef bodyDef = b2DefaultBodyDef();
      bodyDef.position = (b2Vec2){0.f, 0.f};
      b2BodyId Wall = b2CreateBody(worldId, &bodyDef);
+
+     borderWall = new BorderWall(1e9, Wall, worldMutex);
+     borderWall->setDamage(0);
+     borderWall->setDefend(1e9);
+     b2Body_SetUserData(Wall, (void *)borderWall);
+
      b2ShapeDef shapeDef = b2DefaultShapeDef(); // 默认为静态
      shapeDef.filter.categoryBits = (uint64_t)MyCategories::BORDER_WALL;
      shapeDef.filter.maskBits = (uint64_t)MyCategories::PLAYER |
@@ -93,6 +99,8 @@ Player *World::addPlayer()
                                 (uint64_t)MyCategories::CAMERA |
                                 (uint64_t)MyCategories::PLAYER;
      shapeDef.filter.groupIndex = negativeGroupIndex--;
+     shapeDef.enableContactEvents = true;
+
      // 圆形
      b2Circle circle;
      circle.center = b2Vec2_zero; // 这个坐标是相对bodyDef.position而言的偏移量
@@ -102,6 +110,7 @@ Player *World::addPlayer()
 
      Player *player = new Player(100, circle.radius, bodyId, worldMutex);
      player->initGroupIndex(shapeDef.filter.groupIndex);
+     player->setDamage(1);
      b2Body_SetUserData(bodyId, (void *)player);
      return player;
 }

@@ -3,6 +3,8 @@
 #include <mutex>
 #include <string>
 #include <cstring>
+#include <vector>
+#include <algorithm>
 enum class MyCategories // uint32
 {
      PLAYER = 0x00000001,
@@ -14,8 +16,11 @@ enum class MyCategories // uint32
 class GameObject
 {
 protected:
-     int health;    // 血量
-     int maxHealth; // 最大血量
+     int health;     // 血量
+     int maxHealth;  // 最大血量
+     int damage = 0; // 解除伤害(每帧的伤害)
+     int defend = 0; // 防御力(直接抵消伤害)
+     std::vector<GameObject *> damageTargets;
 
      b2BodyId bodyId;
      // 创建body需要对世界进行写操作，因此需要锁
@@ -28,7 +33,7 @@ protected:
 
      int32_t groupIndex = 0; // 物体所在碰撞组(默认不在任何组)
 
-     bool isVisible = true;
+     bool isVisible = true; // 物体是可见(是否透明)
 
 public:
      GameObject(int maxHealth, b2BodyId bodyId, std::mutex &worldMutex);
@@ -36,10 +41,19 @@ public:
      // 删除前请确保世界已经停止模拟
      virtual ~GameObject();
 
-     // virtual void takeDamage(int damage);
+     /**
+      * @brief 对目标造成伤害
+      * @param obj 被攻击的对象
+      */
+     virtual void takeDamage(GameObject *obj);
+
+     // 将攻击对象加入列表
+     virtual void addDamageTarget(GameObject *obj);
+     // 将攻击对象移除类别
+     virtual void removeDamageTarget(GameObject *obj);
 
      // 打包数据用于传输到前端进行渲染
-     virtual std::string packData() = 0;
+     virtual std::string packData() { return ""; };
 
      // virtual void update() = 0;
 
@@ -57,7 +71,16 @@ public:
      float getAngle() const;
      // 获取线速度
      b2Vec2 getVelocity();
+
+     // 获取伤害
+     int getDamage() const;
+
+     // 获取物体是否死亡
+     bool getIsDead() const;
+
      bool getIsVisible() const;
+
+     int getDefend() const;
 
      void setHealth(int value);
      void setMaxHealth(int value);
@@ -69,4 +92,8 @@ public:
      void initGroupIndex(int32_t value);
 
      void setIsVisible(bool v);
+
+     void setDamage(int v);
+
+     void setDefend(int v);
 };

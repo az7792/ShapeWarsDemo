@@ -1,5 +1,4 @@
 #include "Tank/Player.h"
-
 Player::Player(int maxHealth, float size, b2BodyId bodyId, std::mutex &worldMutex)
     : GameObject(maxHealth, bodyId, worldMutex), gold(0), score(0), size(size)
 {
@@ -36,49 +35,18 @@ void Player::setScore(int score)
      this->score = score;
 }
 
-void Player::keyDown(std::string key)
-{
-     if (key == "w")
-          keyStates[0] = 1;
-     else if (key == "a")
-          keyStates[1] = 1;
-     else if (key == "s")
-          keyStates[2] = 1;
-     else if (key == "d")
-          keyStates[3] = 1;
-}
-
-void Player::keyUp(std::string key)
-{
-     if (key == "w")
-          keyStates[0] = 0;
-     else if (key == "a")
-          keyStates[1] = 0;
-     else if (key == "s")
-          keyStates[2] = 0;
-     else if (key == "d")
-          keyStates[3] = 0;
-}
-
-void Player::aim(float angle)
-{
-     for (auto &v : barrels)
-     {
-          v->setAngle(angle);
-     }
-}
-
 void Player::fixedUpdate()
 {
      GameObject::fixedUpdate();
-     // 重置炮管的打包状态
+     // 重置炮管的打包状态与更新炮管角度
      for (auto &v : barrels)
      {
           v->resetPackedStatus();
+          v->setAngle(atan2(operationStatus.y - this->getY(), operationStatus.x - this->getX()));
      }
 
-     int moveX = keyStates[3] - keyStates[1];
-     int moveY = keyStates[0] - keyStates[2];
+     int moveX = operationStatus.getKeyStatus(D) - operationStatus.getKeyStatus(A);
+     int moveY = operationStatus.getKeyStatus(W) - operationStatus.getKeyStatus(S);
 
      if (moveX == 0 && moveY == 0)
      {
@@ -169,6 +137,11 @@ std::string Player::packData()
 
 std::string Player::getFrameData()
 {
+     if (getIsDead())
+     {
+          std::string str = {2, 2};
+          return str;
+     }
      camera->setPosition(this->getPosition());
      return camera->getFrameData();
 }

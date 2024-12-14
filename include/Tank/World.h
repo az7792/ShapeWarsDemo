@@ -1,12 +1,15 @@
 #pragma once
 #include "GameObject.h"
 #include "Player.h"
+#include "BorderWall.h"
 #include "Logger.h"
 #include <deque>
 #include <mutex>
 class World
 {
 private:
+     BorderWall *borderWall = nullptr; // 边界墙
+
      b2WorldId worldId;
      std::mutex worldMutex;       // 保护世界状态的锁
      float timeStep = 1.f / 60.f; // 帧间隔
