@@ -1,5 +1,7 @@
 #include "Tank/World.h"
-
+#include "Tank/GameObject.h"
+#include "Tank/Player.h"
+#include "Tank/BorderWall.h"
 World::World(b2Vec2 gravity = (b2Vec2){0, 0})
 {
      b2WorldDef worldDef = b2DefaultWorldDef();
@@ -20,7 +22,7 @@ World::World(float w, float h, b2Vec2 gravity = (b2Vec2){0, 0})
      bodyDef.position = (b2Vec2){0.f, 0.f};
      b2BodyId Wall = b2CreateBody(worldId, &bodyDef);
 
-     borderWall = new BorderWall(1e9, Wall, worldMutex);
+     borderWall = new BorderWall(1e9, Wall, this);
      borderWall->setDamage(0);
      borderWall->setDefend(1e9);
      b2Body_SetUserData(Wall, (void *)borderWall);
@@ -69,6 +71,11 @@ b2WorldId World::getWorldId()
      return worldId;
 }
 
+std::mutex &World::getWorldMutex()
+{
+     return worldMutex;
+}
+
 float World::getTimeStep()
 {
      return timeStep;
@@ -108,9 +115,11 @@ Player *World::addPlayer()
 
      b2CreateCircleShape(bodyId, &shapeDef, &circle);
 
-     Player *player = new Player(100, circle.radius, bodyId, worldMutex);
+     Player *player = new Player(100, circle.radius, bodyId, this);
      player->initGroupIndex(shapeDef.filter.groupIndex);
      player->setDamage(1);
+     player->setScore(100);
+     player->setGold(100);
      b2Body_SetUserData(bodyId, (void *)player);
      return player;
 }

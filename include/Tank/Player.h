@@ -5,7 +5,10 @@
 #include "OperationStatus.h"
 #include <vector>
 #include <cmath>
+class GameObject;
+class Barrel;
 class Camera;
+class World;
 class Player : public GameObject
 {
 private:
@@ -19,14 +22,22 @@ private:
 
 public:
      OperationStatus operationStatus;
-     Player(int maxHealth, float size, b2BodyId bodyId, std::mutex &worldMutex);
+     Player(int maxHealth, float size, b2BodyId bodyId, World *world);
      ~Player();
      int getGold();
      int getScore();
+
+     void addGold(int v);
+     void subGold(int v);
+     void addScore(int v);
+     void subScore(int v);
+
      void setGold(int gold);
      void setScore(int score);
 
      void fixedUpdate() override;
+
+     void takeDamage(GameObject *obj) override;
 
      std::string packData() override;
 

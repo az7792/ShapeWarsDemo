@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# 设置构建类型为 Debug
+set(CMAKE_BUILD_TYPE Debug)
+
 # 查找源文件
 file(GLOB SRC src/*.cpp src/**/*.cpp)
 set(SRC ${SRC} main.cpp)
@@ -17,7 +20,8 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/.)
 add_executable(${PROJECT_NAME} ${SRC})
 
 # 设置编译选项
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -g)
+
 
 # 设置头文件目录
 target_include_directories(${PROJECT_NAME} PRIVATE include)

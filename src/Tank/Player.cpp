@@ -1,11 +1,11 @@
 #include "Tank/Player.h"
-Player::Player(int maxHealth, float size, b2BodyId bodyId, std::mutex &worldMutex)
-    : GameObject(maxHealth, bodyId, worldMutex), gold(0), score(0), size(size)
+Player::Player(int maxHealth, float size, b2BodyId bodyId, World *world)
+    : GameObject(maxHealth, bodyId, world), gold(0), score(0), size(size)
 {
      b2Vec2 pos = this->getPosition();
      camera = new Camera(pos.x, pos.y, 5.1, 2.9, this);
      // 初始时自带一个普通炮管
-     barrels.emplace_back(new Barrel(0.04, 0.1));
+     barrels.emplace_back(new Barrel(0.04, 0.1, this));
 }
 
 Player::~Player()
@@ -23,6 +23,26 @@ int Player::getGold()
 int Player::getScore()
 {
      return score;
+}
+
+void Player::addGold(int v)
+{
+     gold += v;
+}
+
+void Player::subGold(int v)
+{
+     gold -= v;
+}
+
+void Player::addScore(int v)
+{
+     score += v;
+}
+
+void Player::subScore(int v)
+{
+     score -= v;
 }
 
 void Player::setGold(int gold)
@@ -43,6 +63,9 @@ void Player::fixedUpdate()
      {
           v->resetPackedStatus();
           v->setAngle(atan2(operationStatus.y - this->getY(), operationStatus.x - this->getX()));
+          if (operationStatus.getKeyStatus(LEFT))
+               v->fire();
+          v->fixedUpdate();
      }
 
      int moveX = operationStatus.getKeyStatus(D) - operationStatus.getKeyStatus(A);
@@ -75,6 +98,22 @@ void Player::fixedUpdate()
      b2Body_ApplyForceToCenter(bodyId, force, true);
 }
 
+void Player::takeDamage(GameObject *obj)
+{
+     GameObject::takeDamage(obj);
+     // 判断是否是否死亡并根据类型觉得是否结算金币和积分
+     if (obj->getIsDead())
+     {
+          Player *player = dynamic_cast<Player *>(obj);
+          if (player) // 表示击中的是玩家
+          {
+               // 结算奖励
+               addGold(player->getGold() / 2);
+               addScore(player->getScore() / 2);
+          }
+     }
+}
+
 std::string Player::packData()
 {
      if (isPacked)
@@ -90,6 +129,9 @@ std::string Player::packData()
      uint64_t ID = b2StoreBodyId(bodyId);
      std::memcpy(dataBuf + dataBufLen, &ID, 8);
      dataBufLen += 8;
+     // 所属碰撞组
+     std::memcpy(dataBuf + dataBufLen, &groupIndex, 4);
+     dataBufLen += 4;
      // 血量
      std::memcpy(dataBuf + dataBufLen, &health, 4);
      dataBufLen += 4;

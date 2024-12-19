@@ -1,25 +1,46 @@
 #pragma once
 #include <string>
 #include <cstring>
+#include <vector>
+#include "Bullet.h"
+#include "Player.h"
+class Player;
+class Bullet;
 class Barrel
 {
 private:
      float width;
      float length;
+     Player *owner;
      // 角度(弧度)
      float angle;
      // 角度偏移量(aimAngle + offsetAngle才是实际显示的角度)
      float offsetAngle;
-     // 子弹类型
-     // placeholder
 
      char dataBuf[4096];    // 数据包
      bool isPacked = false; // 是否已经打包好数据
      int dataBufLen = 0;    // 包的长度
+
+     std::vector<Bullet *> bullets;
+
+     bool canFire;                                       // 是否可以发射
+     std::chrono::steady_clock::time_point lastFireTime; // 上次发射的时间
+     const std::chrono::milliseconds fireCooldown;       // 发射冷却时间(ms)
+
+     // 子弹的物理定义
+     b2BodyDef bodyDef;
+     b2ShapeDef shapeDef;
+     b2Circle circle;
+
 public:
-     Barrel();
-     Barrel(float width, float length);
+     Barrel(float width, float length, Player *player);
      virtual ~Barrel();
+
+     // 更新所有子弹
+     void fixedUpdate();
+
+     // 发射(修改canFire=true)
+     void fire();
 
      // 获取宽度
      float getWidth() const;

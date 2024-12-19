@@ -1,11 +1,11 @@
 #include "Tank/GameObject.h"
 
-GameObject::GameObject(int maxHealth, b2BodyId bodyId, std::mutex &worldMutex)
-    : health(maxHealth), maxHealth(maxHealth), bodyId(bodyId), worldMutex(worldMutex) {}
+GameObject::GameObject(int maxHealth, b2BodyId bodyId, World *world)
+    : health(maxHealth), maxHealth(maxHealth), bodyId(bodyId), world(world) {}
 
 GameObject::~GameObject()
 {
-     std::lock_guard<std::mutex> lock(worldMutex);
+     std::lock_guard<std::mutex> lock(world->getWorldMutex());
      if (b2Body_IsValid(bodyId))
           b2DestroyBody(bodyId);
 }
@@ -117,6 +117,16 @@ int GameObject::getDamage() const
      return damage;
 }
 
+int32_t GameObject::getGroupIndex()
+{
+     return groupIndex;
+}
+
+World *GameObject::getWorld()
+{
+     return world;
+}
+
 b2BodyId GameObject::getBodyId() const
 {
      return bodyId;
@@ -134,7 +144,7 @@ void GameObject::setMaxHealth(int value)
 
 void GameObject::setVelocity(b2Vec2 velocity)
 {
-     std::lock_guard<std::mutex> lock(worldMutex);
+     std::lock_guard<std::mutex> lock(world->getWorldMutex());
      b2Body_SetLinearVelocity(bodyId, velocity);
 }
 
@@ -162,6 +172,11 @@ void GameObject::setDamage(int v)
 void GameObject::setDefend(int v)
 {
      defend = v;
+}
+
+void GameObject::setBodyId(b2BodyId bodyId)
+{
+     this->bodyId = bodyId;
 }
 
 bool GameObject::getIsDead() const

@@ -1,10 +1,14 @@
 #pragma once
-#include "GameObject.h"
-#include "Player.h"
-#include "BorderWall.h"
 #include "Logger.h"
 #include <deque>
 #include <mutex>
+#include "box2d/box2d.h"
+
+// 避免循环依赖，具体实现在.cpp里包含
+class GameObject;
+class Player;
+class BorderWall;
+
 class World
 {
 private:
@@ -30,6 +34,9 @@ public:
 
      // 获取世界id
      b2WorldId getWorldId();
+
+     // 获取世界锁
+     std::mutex &getWorldMutex();
 
      // 获取帧间隔
      float getTimeStep();

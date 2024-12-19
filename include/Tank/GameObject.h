@@ -5,6 +5,9 @@
 #include <cstring>
 #include <vector>
 #include <algorithm>
+#include "World.h"
+class World;
+
 enum class MyCategories // uint32
 {
      PLAYER = 0x00000001,
@@ -18,13 +21,11 @@ class GameObject
 protected:
      int health;     // 血量
      int maxHealth;  // 最大血量
-     int damage = 0; // 解除伤害(每帧的伤害)
+     int damage = 0; // 伤害(每帧的伤害)
      int defend = 0; // 防御力(直接抵消伤害)
      std::vector<GameObject *> damageTargets;
 
      b2BodyId bodyId;
-     // 创建body需要对世界进行写操作，因此需要锁
-     std::mutex &worldMutex;
 
      char dataBuf[4096];       // 数据包
      bool isPacked = false;    // 是否已经打包好数据
@@ -35,8 +36,11 @@ protected:
 
      bool isVisible = true; // 物体是可见(是否透明)
 
+     // 所属世界
+     World *world;
+
 public:
-     GameObject(int maxHealth, b2BodyId bodyId, std::mutex &worldMutex);
+     GameObject(int maxHealth, b2BodyId bodyId, World *world);
 
      // 删除前请确保世界已经停止模拟
      virtual ~GameObject();
@@ -75,6 +79,11 @@ public:
      // 获取伤害
      int getDamage() const;
 
+     // 获取玩家所属组
+     int32_t getGroupIndex();
+
+     World *getWorld();
+
      // 获取物体是否死亡
      bool getIsDead() const;
 
@@ -96,4 +105,6 @@ public:
      void setDamage(int v);
 
      void setDefend(int v);
+
+     void setBodyId(b2BodyId bodyId);
 };
