@@ -235,8 +235,6 @@ void WebSocketServer::subConnect(TcpConnection *tc)
      std::lock_guard<std::mutex> lock(tcpConnectedMutex);
      if (tc != nullptr && tcpConnected.find(tc) != tcpConnected.end())
      {
-          if (onClose)
-               onClose(tc);
           tcpConnected.erase(tc);
           delete tc;
           tc = nullptr;

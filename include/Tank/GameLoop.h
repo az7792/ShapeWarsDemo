@@ -10,15 +10,6 @@ enum class MessageType : uint8_t
      Ping = 3,                  // 3：Ping,客户端测试延迟用的
 };
 
-enum class ObjectType : uint8_t
-{
-     Circle = 0,    // 0 : 圆形
-     Triangle = 1,  // 1 : 正三角形
-     Square = 2,    // 2 : 正方形
-     Rectangle = 3, // 3 : 长方形
-     Pentagon = 4   // 4 : 正五边形
-};
-
 enum class OperationType : uint8_t
 {
      PlayerOperation = 0, // 1 : 玩家操作
@@ -38,6 +29,8 @@ private:
      void handleOnClose(TcpConnection *tc);
      void handleOnMessage(const std::string msg, TcpConnection *tc);
 
+     std::chrono::steady_clock::time_point lastTime; // 上次刷新的时间
+     const std::chrono::milliseconds frameTime;      // 帧间隔
 public:
      GameLoop();
      void loop();

@@ -23,6 +23,7 @@ private:
 public:
      Bullet(int maxHealth, b2BodyId bodyId, World *world);
      ~Bullet();
+     MyCategories getType() override { return MyCategories::BULLET; }
 
      void initOwner(Player *p);
 

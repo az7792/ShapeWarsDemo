@@ -47,6 +47,7 @@ void Barrel::fixedUpdate() // *这一步是在世界步进前进行的，因此�
                float speed = 0.5;
                float ang = getAimAngle();
                v->onStart(bodyId, {speed * cos(ang), speed * sin(ang)});
+               v->setSize(circle.radius);
                canFire = false;
           }
      }
@@ -102,6 +103,7 @@ float Barrel::getWidth() const
 void Barrel::setWidth(float newWidth)
 {
      width = newWidth;
+     circle.radius = width / 2;
 }
 
 float Barrel::getLength() const
@@ -163,4 +165,10 @@ std::string Barrel::packData()
 void Barrel::resetPackedStatus()
 {
      isPacked = false;
+}
+
+void Barrel::removeDeadDamageTarget()
+{
+     for (auto &v : bullets)
+          v->removeDeadDamageTarget();
 }

@@ -45,7 +45,7 @@ public:
      // 获取宽度
      float getWidth() const;
 
-     // 设置宽度
+     // 设置宽度（同时会改变子弹的大小）
      void setWidth(float newWidth);
 
      // 获取高度
@@ -74,4 +74,7 @@ public:
 
      // 重置打包状态
      void resetPackedStatus();
+
+     // 清理剩余死亡物体，清理攻击列表
+     void removeDeadDamageTarget();
 };

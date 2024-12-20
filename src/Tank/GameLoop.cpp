@@ -51,7 +51,9 @@ void GameLoop::handleOnMessage(const std::string msg, TcpConnection *tc)
 }
 
 GameLoop::GameLoop() : world(5, 5, (b2Vec2){0.f, 0.f}),
-                       webSocketServer(InetAddress("0.0.0.0", 7792))
+                       webSocketServer(InetAddress("0.0.0.0", 7792)),
+                       lastTime(std::chrono::steady_clock::now()),
+                       frameTime(static_cast<long long>(world.getTimeStep() * 1000))
 {
      webSocketServer.setOnOpen(std::bind(&GameLoop::handleOnOpen, this, std::placeholders::_1));
      webSocketServer.setOnMessage(std::bind(&GameLoop::handleOnMessage, this, std::placeholders::_1, std::placeholders::_2));
@@ -68,7 +70,6 @@ void GameLoop::loop()
                for (auto &v : players)
                     if (v.second != nullptr)
                          v.second->fixedUpdate();
-               // 移除死亡的物体
           }
 
           world.updateWorld();
@@ -100,7 +101,22 @@ void GameLoop::loop()
                }
           }
 
-          std::this_thread::sleep_for(std::chrono::duration<double>(world.getTimeStep()));
+          // 移除死亡的物体
+          // *可能出现玩家A对B的判定时B没死，但其他玩家对B判定导致B死了，而此时A不知道
+          // *可能出现玩家A对B判定导致B死亡，而没清除刚体导致接触事件触发，
+          //  随后刚体又被清除掉，导致某些物体对nullptr对象进行攻击判定
+          // 因此需要单独做清理
+          {
+               std::shared_lock<std::shared_mutex> lock(playersSharedMutex); // 读
+               for (auto &v : players)
+                    if (v.second != nullptr)
+                         v.second->removeDeadDamageTarget();
+          }
+
+          // 休眠到目标时间点
+          auto nextFrameTime = lastTime + frameTime;
+          std::this_thread::sleep_until(nextFrameTime);
+          lastTime = nextFrameTime;
 
           {
                std::unique_lock<std::shared_mutex> lock(playersSharedMutex); // 写
@@ -130,7 +146,7 @@ void GameLoop::loop()
                          Logger::instance().info("连接销毁成功");
                          std::cout << "palyer num: " << players.size() << std::endl;
                     }
-               }
-          }
-     }
+               } // for end
+          } // lock end
+     } // while end
 }

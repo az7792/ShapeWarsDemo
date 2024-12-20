@@ -24,8 +24,13 @@ public:
      OperationStatus operationStatus;
      Player(int maxHealth, float size, b2BodyId bodyId, World *world);
      ~Player();
-     int getGold();
-     int getScore();
+     MyCategories getType() override { return MyCategories::PLAYER; }
+
+     // 清理剩余死亡物体，清理攻击列表
+     void removeDeadDamageTarget() override;
+
+     int getGold() override;
+     int getScore() override;
 
      void addGold(int v);
      void subGold(int v);

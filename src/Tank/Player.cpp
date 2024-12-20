@@ -15,6 +15,14 @@ Player::~Player()
           delete v;
 }
 
+void Player::removeDeadDamageTarget()
+{
+     GameObject::removeDeadDamageTarget();
+     // 通知炮管去清理子弹的 判定列表
+     for (auto &v : barrels)
+          v->removeDeadDamageTarget();
+}
+
 int Player::getGold()
 {
      return gold;
@@ -102,15 +110,11 @@ void Player::takeDamage(GameObject *obj)
 {
      GameObject::takeDamage(obj);
      // 判断是否是否死亡并根据类型觉得是否结算金币和积分
-     if (obj->getIsDead())
+     if (obj->getIsDead() && (obj->getType() == MyCategories::PLAYER || obj->getType() == MyCategories::RESOURCE_BLOCK))
      {
-          Player *player = dynamic_cast<Player *>(obj);
-          if (player) // 表示击中的是玩家
-          {
-               // 结算奖励
-               addGold(player->getGold() / 2);
-               addScore(player->getScore() / 2);
-          }
+          // 结算奖励
+          addGold(obj->getGold() / 2);
+          addScore(obj->getScore() / 2);
      }
 }
 

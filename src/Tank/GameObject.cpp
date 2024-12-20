@@ -34,6 +34,26 @@ void GameObject::removeDamageTarget(GameObject *obj)
      }
 }
 
+void GameObject::removeDeadDamageTarget()
+{
+     size_t i = 0;
+     while (i < damageTargets.size())
+     {
+          if (damageTargets[i]->getIsDead())
+          {
+               if (getType() == MyCategories::PLAYER)
+                    Logger::instance().debug("玩家移除成功");
+               else if (getType() == MyCategories::BULLET)
+                    Logger::instance().debug("子弹移除成功");
+
+               std::swap(damageTargets[i], damageTargets.back());
+               damageTargets.pop_back();
+          }
+          else
+               ++i;
+     }
+}
+
 void GameObject::fixedUpdate()
 {
      // 伤害判定

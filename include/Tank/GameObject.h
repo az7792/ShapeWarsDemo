@@ -10,11 +10,21 @@ class World;
 
 enum class MyCategories // uint32
 {
+     GAMEOBJECT = 0x00000000,
      PLAYER = 0x00000001,
      BULLET = 0x00000002,
      RESOURCE_BLOCK = 0x00000004,
      BORDER_WALL = 0x00000008,
      CAMERA = 0x00000010,
+};
+
+enum class ResourceBlockType : uint8_t
+{
+     Circle = 0,    // 0 : 圆形
+     Triangle = 1,  // 1 : 正三角形
+     Square = 2,    // 2 : 正方形
+     Rectangle = 3, // 3 : 长方形
+     Pentagon = 4   // 4 : 正五边形
 };
 class GameObject
 {
@@ -45,16 +55,23 @@ public:
      // 删除前请确保世界已经停止模拟
      virtual ~GameObject();
 
+     // 返回当前对象的类型
+     virtual MyCategories getType() { return MyCategories::GAMEOBJECT; }
+
      /**
       * @brief 对目标造成伤害
       * @param obj 被攻击的对象
       */
      virtual void takeDamage(GameObject *obj);
+     virtual int getGold() { return 0; }  // 辅助利用多态
+     virtual int getScore() { return 0; } // 辅助利用多态
 
      // 将攻击对象加入列表
      virtual void addDamageTarget(GameObject *obj);
      // 将攻击对象移除类别
      virtual void removeDamageTarget(GameObject *obj);
+     // 清理剩余死亡物体，清理攻击列表
+     virtual void removeDeadDamageTarget();
 
      // 打包数据用于传输到前端进行渲染
      virtual std::string packData() { return ""; };

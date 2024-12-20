@@ -21,7 +21,7 @@ void Bullet::setTakeDamageNum(int v)
 void Bullet::fixedUpdate()
 {
      GameObject::fixedUpdate();
-     health--;
+     health--; // 限制飞行距离
      if (getIsDead())
      {
           destroyBody();
@@ -74,15 +74,11 @@ void Bullet::takeDamage(GameObject *obj)
      takeDamageNum--;
 
      // 判断是否是否死亡并根据类型觉得是否结算金币和积分
-     if (obj->getIsDead())
+     if (obj->getIsDead() && (obj->getType() == MyCategories::PLAYER || obj->getType() == MyCategories::RESOURCE_BLOCK))
      {
-          Player *player = dynamic_cast<Player *>(obj);
-          if (player) // 表示击中的是玩家
-          {
-               // 结算奖励
-               owner->addGold(player->getGold() / 2);
-               owner->addScore(player->getScore() / 2);
-          }
+          // 结算奖励
+          owner->addGold(obj->getGold() / 2);
+          owner->addScore(obj->getScore() / 2);
      }
 }
 
@@ -128,6 +124,7 @@ void Bullet::onStart(b2BodyId bodyId, b2Vec2 speed)
      health = maxHealth;
      takeDamageNum = maxTakeDamageNum;
      isAvailable = true;
+     damageTargets.clear();
      b2Body_SetLinearVelocity(bodyId, speed);
      b2Body_SetUserData(bodyId, (void *)this);
 }
