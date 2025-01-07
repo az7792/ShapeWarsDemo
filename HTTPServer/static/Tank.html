@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Document</title>
+     <style>
+          #canvas {
+               border: 2px solid black;
+          }
+     </style>
+     <script src="./js/player.js"></script>
+</head>
+
+<body>
+     <button id="btn">创建新角色</button>
+     <!-- 1cm:5px -->
+     <canvas id="gameCanvas"></canvas>
+     <canvas id="minimapCanvas"></canvas>
+     <script>
+          /** @type {HTMLCanvasElement}*/
+          // 离屏画布，用来绘制背景网格
+          const offscreenCanvas = document.createElement("canvas");
+          offscreenCanvas.width = 13 * 500;//扩展了1.5米的边界
+          offscreenCanvas.height = 13 * 500;
+
+          // 前景画布
+          const canvas = document.getElementById("gameCanvas");
+          const ctx = canvas.getContext("2d");
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+
+          //小地图画布
+          // 离屏画布，用来绘制背景网格
+          const minimapCanvas = document.getElementById("minimapCanvas");
+          minimapCanvas.width = 200;
+          minimapCanvas.height = 200;
+
+          // 摄像机
+          let camera = new Camera(offscreenCanvas, canvas, ctx);
+
+          //小地图
+          let minimap = new Minimap(minimapCanvas, offscreenCanvas.width, offscreenCanvas.height);
+
+          // 创建 WebSocket 连接
+          //const socket = new WebSocket("ws://172.25.148.253:7792");
+          const socket = new WebSocket("ws://123.56.155.4:7792");
+          socket.binaryType = 'arraybuffer';
+
+          // 网络帧状态
+          let webFrameStats = new WebFrameStats(socket);
+
+          // 玩家操作按键状态
+          let playerOperation = new PlayerOperation();
+
+
+          let isCreated = false;
+          const btn = document.getElementById("btn");
+          btn.onclick = () => {
+               if (!isCreated) {
+                    sendMessage(new Uint8Array([2, 1]));
+                    isCreated = true;
+               }
+          };
+
+          // 键盘事件：按下与抬起
+          document.addEventListener("keydown", (event) => {
+               playerOperation.setKeyStatus(event.key, true);
+          });
+
+          document.addEventListener("keyup", (event) => {
+               playerOperation.setKeyStatus(event.key, false);
+          });
+
+          // 鼠标事件：按下与抬起
+          canvas.addEventListener("mousedown", (event) => {
+               if (event.button === 0) {  // 0 是左键
+                    playerOperation.setKeyStatus('left', true);
+               } else if (event.button === 2) {  // 2 是右键
+                    playerOperation.setKeyStatus('right', true);
+               }
+          });
+
+          canvas.addEventListener("mouseup", (event) => {
+               if (event.button === 0) {  // 0 是左键
+                    playerOperation.setKeyStatus('left', false);
+               } else if (event.button === 2) {  // 2 是右键
+                    playerOperation.setKeyStatus('right', false);
+               }
+          });
+
+          window.addEventListener('blur', function () {
+               playerOperation.onBlur();
+          });
+
+
+          let lastMouseX, lastMouseY;
+          setInterval(function () {
+               if (Player.nowPlayer == null)
+                    return;
+               let rect = canvas.getBoundingClientRect();
+               let mouseX = (lastMouseX - rect.left - canvas.width / 2);
+               let mouseY = -(lastMouseY - rect.top - canvas.height / 2);
+               Player.nowPlayer.barrel.angle = Math.atan2(mouseY - (camera.targetY - camera.y) * camera.scale, mouseX - (camera.targetX - camera.x) * camera.scale);
+               //更新鼠标在物理世界中的坐标
+               playerOperation.mouseX = mouseX / camera.scale + camera.x;
+               playerOperation.mouseY = mouseY / camera.scale + camera.y;
+
+               //发送按键操作
+               sendMessage(playerOperation.packData());
+          }, 16);
+
+          let lastupdateMousemove = Date.now();
+          document.addEventListener("mousemove", (event) => {
+               let currentTime = Date.now();
+               if (currentTime - lastupdateMousemove > 16 && Player.nowPlayer != null) {
+                    // let rect = canvas.getBoundingClientRect();
+                    // let mouseX = (event.clientX - rect.left - canvas.width / 2);
+                    // let mouseY = -(event.clientY - rect.top - canvas.height / 2);
+                    // Player.nowPlayer.barrel.angle = Math.atan2(mouseY - (camera.targetY - camera.y) * camera.scale, mouseX - (camera.targetX - camera.x) * camera.scale);
+
+                    // //更新鼠标在物理世界中的坐标
+                    // playerOperation.mouseX = mouseX / camera.scale + camera.x;
+                    // playerOperation.mouseY = mouseY / camera.scale + camera.y;
+                    //更新鼠标在屏幕的坐标
+                    lastMouseX = event.clientX;
+                    lastMouseY = event.clientY;
+
+                    lastSendMousemove = currentTime;
+               }
+          });
+
+          // 连接打开时触发
+          socket.onopen = () => {
+               console.log("WebSocket 连接已建立");
+          };
+
+          socket.onmessage = (event) => {
+
+               //原始数据
+               let offset = { value: 0 };
+               const dataView = new DataView(event.data);
+               let MessageType = dataView.getUint8(offset.value, true);
+               offset.value++;
+
+               if (MessageType == 1) {
+                    webFrameStats.update();
+                    while (offset.value < dataView.byteLength) {
+                         let mark = dataView.getUint8(offset.value, true);
+                         offset.value++;
+                         if (mark == 1) {//解析摄像机
+                              camera.updateFromBuffer(dataView, offset);
+                              //根据摄像机坐标取截取背景网格(1米：500像素)
+                              camera.drawBackground();
+                         }
+                         else if (mark == 2) {//解析玩家
+                              //解析玩家并渲染
+                              let player = Player.updateFromBuffer(dataView, offset);
+                              player.draw(camera);
+                         }
+                         else if (mark == 3) {//解析当前用户的玩家ID
+                              Player.nowPlayerID = dataView.getBigUint64(offset.value, true);
+                              offset.value += 8;
+                         } else if (mark == 4) {
+                              Bullet.drawBullet(dataView, offset, camera);
+                         }
+                    }
+                    //绘制小地图
+                    if (Player.nowPlayer != null) {
+                         minimap.draw(Player.nowPlayer, webFrameStats);
+                    }
+               } else if (MessageType == 2) {
+                    let opcode = dataView.getUint8(offset.value, true);
+                    offset.value++;
+                    if (opcode == 2) {
+                         isCreated = false;
+                         Player.nowPlayer = null;
+                         Player.playerMap.delete(Player.nowPlayerID);
+                         Player.nowPlayerID = null;
+                         alert("角色死亡请重新创建角色");
+                    }
+               } else if (MessageType == 3) {//测试延迟的自定义ping的返回包
+                    webFrameStats.updatePing(Date.now());
+               }
+          };
+
+          // 连接关闭时触发
+          socket.onclose = () => {
+               console.log("WebSocket 连接已关闭");
+          };
+
+          // 发生错误时触发
+          socket.onerror = (error) => {
+               console.error("WebSocket 错误：", error);
+          };
+
+          //发送
+          function sendMessage(messageText) {
+               if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(messageText);
+               } else {
+                    //alert("WebSocket 连接未打开");
+               }
+          }
+     </script>
+</body>
+
+</html>

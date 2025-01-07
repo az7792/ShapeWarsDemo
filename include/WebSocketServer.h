@@ -183,7 +183,7 @@ class WebSocketServer
      TcpServer tcpServer;
      bool isRunning;
 
-     const size_t MAX_CONNECTED = 20;                 // 最大连接数
+     const size_t MAX_CONNECTED = 50;                 // 最大连接数
      std::mutex tcpConnectedMutex;                     // 同步tcpConnected的锁
      std::unordered_set<TcpConnection *> tcpConnected; // 管理已经连接的websocket链接
      void addConnect(TcpConnection *tc);               // 增加一个新连接

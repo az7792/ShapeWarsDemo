@@ -12,6 +12,8 @@ make || { echo "Make failed"; exit 1; }
 cd ..
 
 # 启动服务
-#./server || { echo "Failed to start server"; exit 1; }
 
+python3 ./HTTPServer/HTTPServer.py &
+
+./server
 echo "Server started successfully"
