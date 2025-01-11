@@ -1,6 +1,7 @@
 #pragma once
 #include "World.h"
-#include "WebSocketServer.h"
+#include "net/WebSocketServer.h"
+#include "Player.h"
 #include <unordered_map>
 #include <shared_mutex>
 enum class MessageType : uint8_t
@@ -25,9 +26,9 @@ private:
      std::shared_mutex playersSharedMutex;
      std::unordered_map<TcpConnection *, Player *> players; // 已经连接的玩家
 
-     void handleOnOpen(TcpConnection *tc);
-     void handleOnClose(TcpConnection *tc);
-     void handleOnMessage(const std::string msg, TcpConnection *tc);
+     void handleOnOpen(const TcpConnection *tc);
+     void handleOnClose(const TcpConnection *tc);
+     void handleOnMessage(TcpConnection *tc,std::string &&msg);
 
      std::chrono::steady_clock::time_point lastTime; // 上次刷新的时间
      const std::chrono::milliseconds frameTime;      // 帧间隔

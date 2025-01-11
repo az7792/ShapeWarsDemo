@@ -1,14 +1,14 @@
 #include "Tank/GameLoop.h"
 
-void GameLoop::handleOnOpen(TcpConnection *tc)
+void GameLoop::handleOnOpen(const TcpConnection *tc)
 {
 }
 
-void GameLoop::handleOnClose(TcpConnection *tc)
+void GameLoop::handleOnClose(const TcpConnection *tc)
 {
 }
 
-void GameLoop::handleOnMessage(const std::string msg, TcpConnection *tc)
+void GameLoop::handleOnMessage(TcpConnection *tc, std::string &&msg)
 {
      if (msg.empty())
           return;
@@ -57,7 +57,7 @@ GameLoop::GameLoop() : world(5, 5, (b2Vec2){0.f, 0.f}),
 {
      webSocketServer.setOnOpen(std::bind(&GameLoop::handleOnOpen, this, std::placeholders::_1));
      webSocketServer.setOnMessage(std::bind(&GameLoop::handleOnMessage, this, std::placeholders::_1, std::placeholders::_2));
-     webSocketServer.setOnclose(std::bind(&GameLoop::handleOnClose, this, std::placeholders::_1));
+     webSocketServer.setOnClose(std::bind(&GameLoop::handleOnClose, this, std::placeholders::_1));
 }
 
 void GameLoop::loop()
@@ -128,8 +128,8 @@ void GameLoop::loop()
                          continue;
                     }
 
-                    bool ok = webSocketServer.send((*it).second->getFrameData(), (*it).first);
-                    if (ok)
+                    int num = webSocketServer.send((*it).second->getFrameData(), (*it).first);
+                    if (num > 0)
                     {
                          if ((*it).second->getIsDead()) // 发送成功但是玩家死了
                          {

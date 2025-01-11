@@ -1,6 +1,9 @@
-#include "Logger.h"
+#include "utils/Logger.h"
 
-Logger::Logger() { updateLogFile(Time::now()); }
+Logger::Logger() : logLevel_(LogLevel::INFO), timeFormat_(TimeFormat::DateTime)
+{
+     updateLogFile(Time::now());
+}
 
 Logger::~Logger()
 {
@@ -19,17 +22,15 @@ Logger &Logger::instance()
 // 更新文件路径
 void Logger::updateLogFile(const Time &tm)
 {
-     int year = tm.getYear();
-     int month = tm.getMonth();
-     int day = tm.getDay();
-
-     if (day == day_ && month == month_ && year == year_)
+     // 日期与上一次使用的一致，不需要更新
+     if (tm.day == day_ && tm.month == month_ && tm.year == year_)
           return;
 
-     year_ = year;
-     month_ = month;
-     day_ = day;
+     year_ = tm.year;
+     month_ = tm.month;
+     day_ = tm.day;
 
+     // 创建日志文件路径
      std::ostringstream oss;
      oss << "logs/"
          << year_ << "/"                                         // 年
@@ -60,7 +61,10 @@ void Logger::log(const Time &tm, LogLevel logLevel, const std::string &message)
           if (logFile_.is_open())
           {
                //[2024-10-18 11:24:45] [INFO] test
-               logFile_ << "[" << tm.toString() << "] [" << logLevelStr_[static_cast<int>(logLevel)] << "] " << message << std::endl;
+               if (timeFormat_ == TimeFormat::DateTime)
+                    logFile_ << "[" << tm.toDateTimeString() << "] [" << logLevelStr_[static_cast<int>(logLevel)] << "] " << message << std::endl;
+               else
+                    logFile_ << "[" << tm.toTimeString() << "] [" << logLevelStr_[static_cast<int>(logLevel)] << "] " << message << std::endl;
                break;
           }
           else if (i == 1)
@@ -68,6 +72,11 @@ void Logger::log(const Time &tm, LogLevel logLevel, const std::string &message)
                std::cerr << "日志文件: " << logFilePath_ << " 打开失败!" << std::endl;
           }
      }
+}
+
+void Logger::setTimeFormat(TimeFormat format)
+{
+     timeFormat_ = format;
 }
 
 void Logger::debug(const std::string &message)
@@ -98,5 +107,5 @@ void Logger::fatal(const std::string &message)
 {
      std::lock_guard<std::mutex> lock(mutex_);
      log(Time::now(), LogLevel::FATAL, message);
-     exit(-1);
+     exit(-1); // 严重错误，需要终止程序
 }

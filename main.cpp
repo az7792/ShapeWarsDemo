@@ -1,17 +1,6 @@
 #include <iostream>
 #include <unistd.h>
-#include "Time.h"
-#include "Logger.h"
-#include "InetAddress.h"
-#include "Socket.h"
-#include "EventLoop.h"
-#include "Acceptor.h"
-#include "TcpConnection.h"
-#include "ThreadPool.h"
-#include "TcpServer.h"
-#include "WebSocketServer.h"
 #include "box2d/box2d.h"
-#include "Tank/World.h"
 #include "Tank/GameLoop.h"
 using namespace std;
 int main()
@@ -23,7 +12,7 @@ int main()
      return 0;
      // // 初始化
      // //  定义
-     // b2WorldDef worldDef = b2DefaultWorldDef();
+      b2WorldDef worldDef = b2DefaultWorldDef();
      // worldDef.gravity = (b2Vec2){0, 0}; // 采用欧几里得坐标系，(0，-10)重力的方向(x,y)
      // // 创建（创建采用复制，因此定义可以在被创建后销毁，例如在栈上创建然后离开作用域后销毁）
      // b2WorldId worldId = b2CreateWorld(&worldDef);
