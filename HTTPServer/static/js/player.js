@@ -190,7 +190,7 @@ class Player {
                camera.ctx.font = "20px Arial"; // 设置字体
                camera.ctx.fillStyle = "black";
                camera.ctx.textAlign = 'center';
-               camera.ctx.fillText("￥:"+this.gold + " XP:" + this.score + " HP:" + this.health, 0, camera.canvas.height / 2 - 30);
+               camera.ctx.fillText("￥:" + this.gold + " XP:" + this.score + " HP:" + this.health, 0, camera.canvas.height / 2 - 30);
                camera.ctx.restore();
           }
           else
@@ -322,7 +322,13 @@ class WebFrameStats {
                this.lastTimeFPS = currentTime;
                if (this.websocket.readyState === WebSocket.OPEN) {
                     this.lastSendTime = currentTime;
-                    this.websocket.send(new Uint8Array([0x03]));
+                    //this.websocket.send(new Uint8Array([0x03]));
+
+                    let message = new ArrayBuffer(9);
+                    let view = new DataView(message);
+                    view.setUint8(0, 0x03); // 设置第一个字节为 0x02
+                    view.setBigInt64(1, BigInt(Date.now()), true);
+                    this.websocket.send(message);
                }
           }
      }

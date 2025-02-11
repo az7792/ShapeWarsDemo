@@ -1,4 +1,5 @@
 #include "net/WebSocketServer.h"
+#include "config/config.h"
 
 std::vector<uint8_t> WebSocketServer::sha1(const std::string &message)
 {
@@ -171,11 +172,13 @@ void WebSocketServer::handleRead(TcpConnection *conn, Buffer &buffer)
                return;
           }
 
-          // 标记连接建立完成
-          addConnect(conn);
-          LOG_INFO(conn->peerAddr.getIpPort() + "WebSocket已连接");
-          if (onOpen)
-               onOpen(conn);
+          if (addConnect(conn))
+          {
+               // 标记连接建立完成
+               LOG_INFO(conn->peerAddr.getIpPort() + "WebSocket已连接");
+               if (onOpen)
+                    onOpen(conn);
+          }
      }
      else
      {
@@ -220,20 +223,23 @@ void WebSocketServer::handleError(TcpConnection *conn)
           onError(conn);
 }
 
-void WebSocketServer::addConnect(TcpConnection *conn)
+bool WebSocketServer::addConnect(TcpConnection *conn)
 {
      if (conn == nullptr)
-          return;
+          return 0;
      std::lock_guard<std::mutex> lock(tcpConnectedMutex);
      if (tcpConnected.size() >= MAX_CONNECTED)
      {
           // 不接受连接，主动断开
           tcpServer.closeConnection(conn);
+          return 0;
      }
      else if (tcpConnected.find(conn) == tcpConnected.end())
      {
           tcpConnected.emplace(conn);
+          return 1;
      }
+     return 0;
 }
 
 void WebSocketServer::subConnect(TcpConnection *conn)
@@ -266,15 +272,15 @@ WebSocketServer::WebSocketServer(const InetAddress &addr) : tcpServer(addr, 2), 
 
 WebSocketServer::~WebSocketServer()
 {
-    close();
+     close();
 }
 
-void WebSocketServer::setOnOpen(std::function<void(const TcpConnection *)> cb)
+void WebSocketServer::setOnOpen(std::function<void(TcpConnection *)> cb)
 {
      onOpen = cb;
 }
 
-void WebSocketServer::setOnClose(std::function<void(const TcpConnection *)> cb)
+void WebSocketServer::setOnClose(std::function<void(TcpConnection *)> cb)
 {
      onClose = cb;
 }
@@ -284,7 +290,7 @@ void WebSocketServer::setOnMessage(std::function<void(TcpConnection *, std::stri
      onMessage = cb;
 }
 
-void WebSocketServer::setOnError(std::function<void(const TcpConnection *)> cb)
+void WebSocketServer::setOnError(std::function<void(TcpConnection *)> cb)
 {
      onError = cb;
 }

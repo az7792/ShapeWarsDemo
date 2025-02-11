@@ -13,7 +13,7 @@ cd ..
 
 # 启动服务
 
-python3 ./HTTPServer/HTTPServer.py &
+#python3 ./HTTPServer/HTTPServer.py &
 
 ./server
 echo "Server started successfully"
